@@ -1,0 +1,109 @@
+[gd_scene load_steps=9 format=3 uid="uid://c21h7xdvxtl7w"]
+
+[ext_resource type="Script" uid="uid://di12wwpksvflp" path="res://content/player/player.gd" id="1_player"]
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_3vyb7"]
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_2rga7"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
+size = Vector2(16, 24)
+
+[sub_resource type="Animation" id="Animation_2rga7"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visual/Pickaxe:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(11.328146, 0.7371212)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visual/Pickaxe:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [-0.49702013]
+}
+
+[sub_resource type="Animation" id="Animation_y66qv"]
+resource_name = "PickaxeSwing"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visual/Pickaxe:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(9.113, 0.737), Vector2(9.243, -2.093), Vector2(9.728, 0.197)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visual/Pickaxe:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [-0.4799655442984406, 0.5078908123303503, -0.24783675378319459]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_oq5wi"]
+_data = {
+&"RESET": SubResource("Animation_2rga7"),
+&"pickaxe_swing": SubResource("Animation_y66qv")
+}
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pickaxe"]
+radius = 20.0
+
+[node name="Player" type="CharacterBody2D"]
+script = ExtResource("1_player")
+
+[node name="Visual" type="CanvasGroup" parent="."]
+unique_name_in_owner = true
+z_index = 1
+
+[node name="Player" type="Sprite2D" parent="Visual"]
+modulate = Color(0.4, 0.7, 1, 1)
+texture = SubResource("CanvasTexture_3vyb7")
+region_enabled = true
+region_rect = Rect2(0, 0, 16, 24)
+
+[node name="Pickaxe" type="Sprite2D" parent="Visual"]
+modulate = Color(0.31308666, 0.16161871, 1.2032687e-07, 1)
+position = Vector2(11.328146, 0.7371212)
+rotation = -0.49702013
+scale = Vector2(20.797216, 5.5)
+texture = SubResource("CanvasTexture_2rga7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_player")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_oq5wi")
+}
+
+[node name="PickaxeHitbox" type="Area2D" parent="."]
+position = Vector2(16, 0)
+monitoring = false
+
+[node name="PickaxeCollision" type="CollisionShape2D" parent="PickaxeHitbox"]
+shape = SubResource("CircleShape2D_pickaxe")

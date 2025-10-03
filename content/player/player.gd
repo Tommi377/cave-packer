@@ -32,7 +32,7 @@ var is_attacking: bool = false
 var facing_right: bool = true
 
 # Node references
-@onready var sprite: Sprite2D = $Sprite2D
+@onready var visual: CanvasGroup = %Visual
 @onready var animation_player: AnimationPlayer = $AnimationPlayer if has_node("AnimationPlayer") else null
 @onready var pickaxe_hitbox: Area2D = $PickaxeHitbox if has_node("PickaxeHitbox") else null
 
@@ -42,31 +42,18 @@ func _ready() -> void:
 	floor_max_angle = deg_to_rad(46) # Spelunky-like slope handling
 
 func _physics_process(delta: float) -> void:
-	# Update timers
 	update_timers(delta)
-	
-	# Handle input
+
 	var input_direction := get_input_direction()
 	
-	# Apply gravity
 	apply_gravity(delta, input_direction)
-	
-	# Handle jump
 	handle_jump()
-	
-	# Handle horizontal movement
 	handle_horizontal_movement(delta, input_direction)
-	
-	# Handle pickaxe attack
 	handle_pickaxe()
-	
-	# Update sprite direction
 	update_sprite_direction(input_direction)
 	
-	# Move the character
 	move_and_slide()
 	
-	# Update coyote time
 	if is_on_floor():
 		coyote_timer = coyote_time
 	else:
@@ -127,8 +114,8 @@ func swing_pickaxe() -> void:
 	pickaxe_timer = pickaxe_cooldown
 	
 	# Play attack animation
-	if animation_player and animation_player.has_animation("attack"):
-		animation_player.play("attack")
+	if animation_player and animation_player.has_animation("pickaxe_swing"):
+		animation_player.play("pickaxe_swing")
 	
 	# Check for destructible blocks in range
 	detect_and_break_blocks()
@@ -151,12 +138,16 @@ func detect_and_break_blocks() -> void:
 func update_sprite_direction(input_direction: float) -> void:
 	if input_direction > 0:
 		facing_right = true
-		if sprite:
-			sprite.flip_h = false
+		if visual:
+			visual.scale.x = 1.0 # Face right (normal)
+		if pickaxe_hitbox:
+			pickaxe_hitbox.position.x = abs(pickaxe_hitbox.position.x) # Positive x (right side)
 	elif input_direction < 0:
 		facing_right = false
-		if sprite:
-			sprite.flip_h = true
+		if visual:
+			visual.scale.x = -1.0 # Face left (flipped)
+		if pickaxe_hitbox:
+			pickaxe_hitbox.position.x = - abs(pickaxe_hitbox.position.x) # Negative x (left side)
 
 func update_timers(delta: float) -> void:
 	if coyote_timer > 0:
