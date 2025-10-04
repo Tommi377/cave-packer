@@ -27,6 +27,10 @@ const ORE_SPAWN_CHANCE = {
 ## Ore drop scene
 const ORE_ITEM_SCENE = preload("res://content/world/ore_item.tscn")
 
+## Block HP tracking - only stores HP for blocks that have been damaged
+## Undamaged blocks are assumed to have full HP based on their y-depth
+var block_hp: Dictionary = {} # { Vector2i: int }
+
 signal block_broken(tile_pos: Vector2i, ore_type: String)
 
 func _ready() -> void:
@@ -44,14 +48,15 @@ func generate_mine(width: int = 40, depth: int = 60) -> void:
 	# Generate from top (y=0) to bottom
 	for y in range(depth):
 		for x in range(width):
-			set_cells_terrain_connect([Vector2i(x, y)], 0, 0, false)
+			var tile_pos = Vector2i(x, y)
+			set_cells_terrain_connect([tile_pos], 0, 0, false)
 			
 			var ore_type := _get_tile_for_depth(y)
 			if ore_type != "STONE":
-				ore_tilemap.set_cell(Vector2i(x, y), 0, ORE_ATLAS[ore_type])
+				ore_tilemap.set_cell(tile_pos, 0, ORE_ATLAS[ore_type])
 				pass
 			if y > 0:
-				fog_tilemap.set_cell(Vector2i(x, y), 0, Vector2i(0, 5))
+				fog_tilemap.set_cell(tile_pos, 0, Vector2i(0, 5))
 	
 	#set_cells_terrain_connect(get_used_cells(), 0, 0)
 	
@@ -85,6 +90,39 @@ func _get_depth_zone(depth_y: int) -> String:
 	else:
 		return "deep"
 
+## Damage a tile at world position (for pickaxe attacks)
+func damage_tile_at_position(world_pos: Vector2, damage: int = 1) -> bool:
+	var tile_pos = local_to_map(to_local(world_pos))
+	return damage_tile(tile_pos, damage)
+
+## Damage a tile at tile coordinates
+func damage_tile(tile_pos: Vector2i, damage: int = 1) -> bool:
+	var tile_data = get_cell_tile_data(tile_pos)
+	if tile_data == null:
+		return false # No tile here
+	
+	# Calculate max HP based on depth
+	var max_hp = tile_pos.y if tile_pos.y > 0 else 1
+	
+	# Get current HP (lazy initialization - if not damaged yet, assume full HP)
+	var current_hp = block_hp.get(tile_pos, max_hp)
+	
+	# Apply damage
+	current_hp -= damage
+	
+	print("Block at ", tile_pos, " took ", damage, " damage. HP: ", current_hp, "/", max_hp)
+	
+	# If HP reaches 0 or below, break the tile
+	if current_hp <= 0:
+		# Clean up HP tracking before breaking
+		block_hp.erase(tile_pos)
+		return break_tile(tile_pos)
+	
+	# Store the damaged HP (only now does it enter the dictionary)
+	block_hp[tile_pos] = current_hp
+	
+	return true # Tile was damaged but not broken
+
 ## Break a tile at world position
 func break_tile_at_position(world_pos: Vector2) -> bool:
 	var tile_pos = local_to_map(to_local(world_pos))
@@ -103,6 +141,9 @@ func break_tile(tile_pos: Vector2i) -> bool:
 	
 	# Determine ore type from atlas coords
 	var ore_type = _atlas_to_ore_type(atlas_coords)
+	
+	# Remove the tile from the HP tracking
+	block_hp.erase(tile_pos)
 	
 	set_cells_terrain_connect([tile_pos], 0, -1, false)
 	ore_tilemap.erase_cell(tile_pos)

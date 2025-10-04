@@ -23,6 +23,7 @@ class_name Player
 @export_group("Pickaxe")
 @export var pickaxe_range: float = 32.0
 @export var pickaxe_cooldown: float = 0.3
+@export var pickaxe_damage: int = 1 # Damage dealt per pickaxe swing
 
 # State tracking
 var coyote_timer: float = 0.0
@@ -154,12 +155,12 @@ func detect_and_break_blocks() -> void:
 	
 	# Find the tilemap in the scene
 	var tilemap = get_tree().get_first_node_in_group("tilemap")
-	if tilemap and tilemap.has_method("break_tile_at_position"):
-		var broke_tile = tilemap.break_tile_at_position(check_position)
-		if broke_tile:
-			print("Broke tile at: ", check_position, " (direction: ", mine_direction, ")")
+	if tilemap and tilemap.has_method("damage_tile_at_position"):
+		var hit_tile = tilemap.damage_tile_at_position(check_position, pickaxe_damage)
+		if hit_tile:
+			print("Hit tile at: ", check_position, " (direction: ", mine_direction, ") for ", pickaxe_damage, " damage")
 		else:
-			print("No tile to break at: ", check_position)
+			print("No tile to hit at: ", check_position)
 	else:
 		print("Swing pickaxe at position: ", check_position)
 
