@@ -3,13 +3,14 @@ extends Node2D
 @onready var tilemap: TileMapLayer = $MineTilemap
 @onready var player: Player = $Player
 @onready var camera: Camera2D = $Player/Camera2D
-
-# Inventory UI
-var inventory_ui: Control = null
+@onready var inventory_ui: Control = $UILayer/InventoryUI
 
 func _ready() -> void:
 	setup_camera()
-	setup_inventory()
+	
+	# Connect player to inventory
+	if player and inventory_ui:
+		player.inventory_ui = inventory_ui
 	
 	# Connect tilemap signals
 	if tilemap:
@@ -25,29 +26,6 @@ func setup_camera() -> void:
 		camera.zoom = Vector2(2.0, 2.0)
 		camera.position_smoothing_enabled = true
 		camera.position_smoothing_speed = 5.0
-
-func setup_inventory() -> void:
-	# Create a CanvasLayer for UI (stays fixed on screen)
-	var ui_layer = CanvasLayer.new()
-	add_child(ui_layer)
-	
-	# Load and instantiate inventory UI
-	var inventory_scene = load("res://content/inventory/inventory_ui.tscn")
-	if inventory_scene:
-		inventory_ui = inventory_scene.instantiate()
-		ui_layer.add_child(inventory_ui)
-		
-		# Position in top-right corner (screen coordinates)
-		inventory_ui.position = Vector2(550, 20)
-		inventory_ui.visible = true
-		
-		# Connect player to inventory
-		if player:
-			player.inventory_ui = inventory_ui
-		
-		print("Inventory UI setup complete")
-	else:
-		print("Failed to load inventory UI scene")
 
 func toggle_inventory() -> void:
 	if inventory_ui:

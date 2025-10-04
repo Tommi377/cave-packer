@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://cr3qxj5wg2oj6"]
+[gd_scene load_steps=3 format=3 uid="uid://cr3qxj5wg2oj6"]
 
 [ext_resource type="Script" path="res://content/inventory/inventory_ui.gd" id="1_inventory"]
+[ext_resource type="Script" path="res://content/inventory/inventory_grid.gd" id="2_grid"]
 
 [node name="InventoryUI" type="Control"]
 custom_minimum_size = Vector2(200, 200)
@@ -10,6 +11,9 @@ offset_right = 200.0
 offset_bottom = 200.0
 mouse_filter = 1
 script = ExtResource("1_inventory")
+
+[node name="InventoryGrid" type="Node" parent="."]
+script = ExtResource("2_grid")
 
 [node name="GridContainer" type="Control" parent="."]
 layout_mode = 1

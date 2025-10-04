@@ -4,8 +4,6 @@ class_name InventoryUI
 ## Visual representation of the inventory grid
 ## Handles user interaction for placing/removing items
 
-const InventoryGridScript = preload("res://content/inventory/inventory_grid.gd")
-
 signal item_pickup_requested(grid_pos: Vector2i)
 signal close_requested()
 
@@ -13,24 +11,22 @@ signal close_requested()
 @export var cell_padding: int = 2
 @export var show_grid_lines: bool = true
 
+@onready var inventory_grid: Node = $InventoryGrid
 @onready var grid_container: Control = $GridContainer
 @onready var preview_container: Control = $PreviewContainer
 @onready var info_label: Label = $InfoPanel/InfoLabel
 
-var inventory_grid: Node
 var held_item: Dictionary = {}
 var held_rotation: int = 0
 var preview_position: Vector2i = Vector2i(-1, -1)
 var preview_valid: bool = false
 
 func _ready() -> void:
-	# Initialize inventory grid
-	inventory_grid = InventoryGridScript.new()
-	add_child(inventory_grid)
-	
-	inventory_grid.item_placed.connect(_on_item_placed)
-	inventory_grid.item_removed.connect(_on_item_removed)
-	inventory_grid.grid_full.connect(_on_grid_full)
+	# Connect inventory grid signals
+	if inventory_grid:
+		inventory_grid.item_placed.connect(_on_item_placed)
+		inventory_grid.item_removed.connect(_on_item_removed)
+		inventory_grid.grid_full.connect(_on_grid_full)
 	
 	_update_ui()
 
