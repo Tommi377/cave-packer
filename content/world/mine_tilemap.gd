@@ -134,7 +134,8 @@ func generate_mine(width: int = 40, depth: int = 60) -> void:
 		set_cell(Vector2i(x, -1), 0, Vector2i(1, 0)) # Stone platform
 	
 	
-	break_tile(Vector2i(0, -1))
+	erase_cell(Vector2i(0, -1))
+	erase_cell(Vector2i(0, 0))
 	
 	print("Mine generated: ", width, "x", depth, " tiles")
 

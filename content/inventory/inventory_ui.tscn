@@ -1,0 +1,40 @@
+[gd_scene load_steps=2 format=3 uid="uid://cr3qxj5wg2oj6"]
+
+[ext_resource type="Script" path="res://content/inventory/inventory_ui.gd" id="1_inventory"]
+
+[node name="InventoryUI" type="Control"]
+custom_minimum_size = Vector2(200, 200)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 200.0
+offset_bottom = 200.0
+mouse_filter = 1
+script = ExtResource("1_inventory")
+
+[node name="GridContainer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="PreviewContainer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="InfoPanel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="InfoLabel" type="Label" parent="InfoPanel"]
+layout_mode = 2
+text = "Value: $0 | Space: 0/25"
+horizontal_alignment = 1
+vertical_alignment = 1

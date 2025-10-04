@@ -38,6 +38,9 @@ var facing_right: bool = true
 # Possibly useless?
 @onready var pickaxe_hitbox: Area2D = $PickaxeHitbox if has_node("PickaxeHitbox") else null
 
+# Inventory reference (set by level controller)
+var inventory_ui: Node = null
+
 func _ready() -> void:
 	# Ensure the player uses the floor detection properly
 	floor_snap_length = 8.0
@@ -170,6 +173,10 @@ func take_damage(_amount: int) -> void:
 	# Implement damage system
 	pass
 
-func collect_ore(_ore_data: Dictionary) -> void:
-	# Implement ore collection
-	pass
+func collect_ore(ore_data: Dictionary) -> void:
+	# Try to add ore to inventory
+	if inventory_ui != null and inventory_ui.has_method("pick_up_item"):
+		inventory_ui.pick_up_item(ore_data)
+		print("Collected ore: ", ore_data.get("type", "unknown"), " (value: $", ore_data.get("value", 0), ")")
+	else:
+		print("No inventory available to collect ore!")
