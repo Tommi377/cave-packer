@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cr3qxj5wg2oj6"]
 
-[ext_resource type="Script" path="res://content/inventory/inventory_ui.gd" id="1_inventory"]
-[ext_resource type="Script" path="res://content/inventory/inventory_grid.gd" id="2_grid"]
+[ext_resource type="Script" uid="uid://big3gx7eelcb5" path="res://content/inventory/inventory_ui.gd" id="1_inventory"]
+[ext_resource type="Script" uid="uid://26s4m5acltbj" path="res://content/inventory/inventory_grid.gd" id="2_grid"]
 
 [node name="InventoryUI" type="Control"]
 custom_minimum_size = Vector2(200, 200)
@@ -20,12 +20,14 @@ layout_mode = 1
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+mouse_filter = 1
 
 [node name="PreviewContainer" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+mouse_filter = 1
 
 [node name="InfoPanel" type="PanelContainer" parent="."]
 layout_mode = 1
@@ -36,9 +38,11 @@ anchor_bottom = 1.0
 offset_top = -50.0
 grow_horizontal = 2
 grow_vertical = 0
+mouse_filter = 1
 
 [node name="InfoLabel" type="Label" parent="InfoPanel"]
 layout_mode = 2
+mouse_filter = 1
 text = "Value: $0 | Space: 0/25"
 horizontal_alignment = 1
 vertical_alignment = 1
