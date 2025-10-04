@@ -23,6 +23,7 @@ var held_from_drop_zone: bool = false
 var held_rotation: int = 0
 var preview_position: Vector2i = Vector2i(-1, -1)
 var preview_valid: bool = false
+var held_item_grab_offset: Vector2i = Vector2i.ZERO # Track where on the item the user grabbed it
 
 var inventory_mode_active: bool = false
 var player_reference: Node2D = null
@@ -122,6 +123,7 @@ func toggle_inventory_mode() -> void:
 		held_rotation = 0
 		preview_position = Vector2i(-1, -1)
 		held_from_drop_zone = false
+		held_item_grab_offset = Vector2i.ZERO
 		held_item_preview.queue_redraw() # Clear preview when closing
 	
 	inventory_mode_changed.emit(inventory_mode_active)
@@ -188,6 +190,7 @@ func _on_drop_zone_item_clicked(ore_data: Dictionary) -> void:
 		held_item = ore_data
 		held_from_drop_zone = true
 		held_rotation = 0
+		held_item_grab_offset = Vector2i.ZERO # No offset for drop zone items
 		# Hide the item from the list visually
 		for i in range(drop_zone_items.size()):
 			if drop_zone_items[i].get("world_node") == ore_data.get("world_node"):
@@ -235,7 +238,9 @@ func _update_mouse_preview() -> void:
 	if grid_rect.has_point(mouse_pos):
 		var grid_x = int(mouse_pos.x / (cell_size + cell_padding))
 		var grid_y = int(mouse_pos.y / (cell_size + cell_padding))
-		preview_position = Vector2i(grid_x, grid_y)
+		
+		# Apply grab offset to preview position so the item places where expected
+		preview_position = Vector2i(grid_x, grid_y) - held_item_grab_offset
 		
 		var shape = inventory_grid._rotate_shape(
 			held_item.get("shape", [Vector2i(0, 0)]),
@@ -306,9 +311,15 @@ func _draw_held_item() -> void:
 	var ore_color = held_item.get("color", Color.GRAY)
 	ore_color.a = 0.8
 	
-	# Draw centered on cursor
+	# Apply grab offset so the item is centered on the cell that was clicked
+	var offset_pixels = Vector2(
+		- held_item_grab_offset.x * (cell_size + cell_padding),
+		- held_item_grab_offset.y * (cell_size + cell_padding)
+	)
+	
+	# Draw centered on cursor with offset
 	for shape_offset in shape:
-		var cell_pos = mouse_pos + Vector2(
+		var cell_pos = mouse_pos + offset_pixels + Vector2(
 			shape_offset.x * (cell_size + cell_padding),
 			shape_offset.y * (cell_size + cell_padding)
 		)
@@ -338,6 +349,7 @@ func _place_held_item() -> void:
 		held_rotation = 0
 		preview_position = Vector2i(-1, -1)
 		held_from_drop_zone = false
+		held_item_grab_offset = Vector2i.ZERO
 		
 		# Clear the held item preview
 		held_item_preview.queue_redraw()
@@ -365,6 +377,7 @@ func _return_held_item() -> void:
 			print("Cannot return item - no space")
 	
 	preview_position = Vector2i(-1, -1)
+	held_item_grab_offset = Vector2i.ZERO
 	
 	# Clear the held item preview
 	held_item_preview.queue_redraw()
@@ -394,7 +407,12 @@ func _on_inventory_container_gui_input(event: InputEvent) -> void:
 			if not ore_data.is_empty():
 				held_item = ore_data
 				held_from_drop_zone = false
-				held_rotation = ore_data.get("rotation", 0)
+				held_rotation = 0 # Reset rotation when picking up
+				
+				# Calculate grab offset - which cell of the ore was clicked
+				var ore_origin = ore_data.get("grid_position", Vector2i(0, 0))
+				held_item_grab_offset = grid_pos - ore_origin
+				
 				_update_ui()
 
 func _remove_ore_from_world(ore_data: Dictionary) -> void:
