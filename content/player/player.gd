@@ -40,6 +40,7 @@ var facing_right: bool = true
 
 # Inventory reference (set by level controller)
 var inventory_ui: InventoryUI = null
+var inventory_mode_active: bool = false
 
 func _ready() -> void:
 	# Ensure the player uses the floor detection properly
@@ -48,6 +49,11 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	update_timers(delta)
+
+	# Don't process movement if inventory is active
+	if inventory_mode_active:
+		velocity = Vector2.ZERO
+		return
 
 	var input_direction := get_input_direction()
 	
@@ -186,19 +192,7 @@ func take_damage(_amount: int) -> void:
 	pass
 
 ## Called by OreItem when player touches it
-func collect_ore(ore: Node2D) -> void:
-	if not ore or not ore.has_method("get_inventory_data"):
-		return
-	
-	var ore_data = ore.get_inventory_data()
-	
-	# Try to add ore to inventory
-	if inventory_ui != null and inventory_ui.has_method("try_add_ore"):
-		var added = inventory_ui.try_add_ore(ore_data)
-		if added:
-			print("Collected ", ore_data.type, " ore (size: ", ore_data.size, ", value: $", ore_data.total_value, ")")
-			ore.queue_free() # Remove ore from world
-		else:
-			print("Inventory full! Cannot collect ore.")
-	else:
-		print("No inventory available to collect ore!")
+func collect_ore(_ore: Node2D) -> void:
+	# Ores are no longer automatically collected
+	# They must be picked up through the inventory UI
+	pass

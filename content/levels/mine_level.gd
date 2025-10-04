@@ -21,6 +21,8 @@ func _ready() -> void:
 	# Connect player to inventory
 	if player and inventory_ui:
 		player.inventory_ui = inventory_ui
+		inventory_ui.set_player(player)
+		inventory_ui.inventory_mode_changed.connect(_on_inventory_mode_changed)
 	
 	# Connect tilemap signals
 	if tilemap:
@@ -54,9 +56,7 @@ func _ready() -> void:
 		GameManager.start_day()
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("toggle_inventory"):
-		toggle_inventory()
-	
+	# Inventory UI now handles toggle internally
 	if event.is_action_pressed("interact"):
 		if player_near_deposit:
 			_deposit_inventory()
@@ -71,8 +71,13 @@ func setup_camera() -> void:
 		camera.position_smoothing_speed = 5.0
 
 func toggle_inventory() -> void:
-	if inventory_ui:
-		inventory_ui.visible = not inventory_ui.visible
+	# Deprecated - inventory UI handles this now
+	pass
+
+func _on_inventory_mode_changed(is_active: bool) -> void:
+	# Update player's inventory mode state
+	if player:
+		player.inventory_mode_active = is_active
 
 func _on_block_broken(tile_pos: Vector2i, ore_type: String) -> void:
 	print("Block broken at ", tile_pos, " - Ore type: ", ore_type)

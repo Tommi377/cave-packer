@@ -30,6 +30,9 @@ func _ready():
 	linear_damp = 2.0 # Add some air resistance
 	angular_damp = 3.0 # Slow down rotation
 	
+	# Add to ore_items group for inventory detection
+	add_to_group("ore_items")
+	
 	# Connect pickup signal
 	if area:
 		area.body_entered.connect(_on_body_entered)
