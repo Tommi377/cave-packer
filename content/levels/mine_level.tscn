@@ -1,0 +1,24 @@
+[gd_scene load_steps=4 format=3 uid="uid://c3vvjn5sdswc7"]
+
+[ext_resource type="Script" uid="uid://brlnj23cak2oo" path="res://content/levels/mine_level.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://c21h7xdvxtl7w" path="res://content/player/player.tscn" id="2_player"]
+[ext_resource type="Script" uid="uid://cvcqkqqvotbgb" path="res://content/world/mine_tilemap.gd" id="3_tilemap"]
+
+[node name="MineLevel" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+offset_left = -100.0
+offset_top = -100.0
+offset_right = 900.0
+offset_bottom = 1100.0
+color = Color(0.1, 0.08, 0.12, 1)
+
+[node name="MineTilemap" type="TileMapLayer" parent="."]
+script = ExtResource("3_tilemap")
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(320, -22)
+pickaxe_range = 16.0
+
+[node name="Camera2D" type="Camera2D" parent="Player"]

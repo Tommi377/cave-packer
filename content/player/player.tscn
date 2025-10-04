@@ -38,7 +38,7 @@ tracks/1/keys = {
 
 [sub_resource type="Animation" id="Animation_y66qv"]
 resource_name = "PickaxeSwing"
-length = 0.5
+length = 0.2
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -46,10 +46,10 @@ tracks/0/path = NodePath("Visual/Pickaxe:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.25, 0.5),
+"times": PackedFloat32Array(0, 0.099999994, 0.2),
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [Vector2(9.113, 0.737), Vector2(9.243, -2.093), Vector2(9.728, 0.197)]
+"values": [Vector2(9.113, 0.737), Vector2(9.243, -2.093), Vector2(9.113, 0.737)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -58,10 +58,10 @@ tracks/1/path = NodePath("Visual/Pickaxe:rotation")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.25, 0.5),
+"times": PackedFloat32Array(0, 0.099999994, 0.2),
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [-0.4799655442984406, 0.5078908123303503, -0.24783675378319459]
+"values": [-0.4799655442984406, 0.5078908123303503, -0.4799655442984406]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_oq5wi"]
@@ -71,9 +71,10 @@ _data = {
 }
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_pickaxe"]
-radius = 20.0
+radius = 8.0
 
 [node name="Player" type="CharacterBody2D"]
+collision_layer = 2
 script = ExtResource("1_player")
 
 [node name="Visual" type="CanvasGroup" parent="."]

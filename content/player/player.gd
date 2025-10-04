@@ -34,6 +34,8 @@ var facing_right: bool = true
 # Node references
 @onready var visual: CanvasGroup = %Visual
 @onready var animation_player: AnimationPlayer = $AnimationPlayer if has_node("AnimationPlayer") else null
+
+# Possibly useless?
 @onready var pickaxe_hitbox: Area2D = $PickaxeHitbox if has_node("PickaxeHitbox") else null
 
 func _ready() -> void:
@@ -129,11 +131,16 @@ func detect_and_break_blocks() -> void:
 	var check_offset := Vector2(pickaxe_range if facing_right else -pickaxe_range, 0)
 	var check_position := global_position + check_offset
 	
-	# Here you would implement tilemap detection and destruction
-	# This will be connected to your tilemap system
-	# Example: get_tilemap().break_tile_at_position(check_position)
-	
-	print("Swing pickaxe at position: ", check_position)
+	# Find the tilemap in the scene
+	var tilemap = get_tree().get_first_node_in_group("tilemap")
+	if tilemap and tilemap.has_method("break_tile_at_position"):
+		var broke_tile = tilemap.break_tile_at_position(check_position)
+		if broke_tile:
+			print("Broke tile at: ", check_position)
+		else:
+			print("No tile to break at: ", check_position)
+	else:
+		print("Swing pickaxe at position: ", check_position)
 
 func update_sprite_direction(input_direction: float) -> void:
 	if input_direction > 0:

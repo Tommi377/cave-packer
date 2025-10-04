@@ -1,0 +1,31 @@
+[gd_scene load_steps=5 format=3 uid="uid://bqjxr3f3oqvvj"]
+
+[ext_resource type="Script" uid="uid://dc2ufhjxefycq" path="res://content/world/ores/ore_pickup.gd" id="1_script"]
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_qjyy3"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(12, 12)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+radius = 8.0
+
+[node name="OreStone" type="RigidBody2D"]
+collision_layer = 4
+script = ExtResource("1_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(0.6, 0.6, 0.6, 1)
+texture = SubResource("CanvasTexture_qjyy3")
+region_enabled = true
+region_rect = Rect2(0, 0, 12, 12)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_1")
+
+[node name="PickupArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="PickupCollision" type="CollisionShape2D" parent="PickupArea"]
+shape = SubResource("CircleShape2D_1")
