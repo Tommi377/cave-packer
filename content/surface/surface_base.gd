@@ -8,19 +8,19 @@ extends Node2D
 @onready var sell_button: Button = $UILayer/SellButton
 
 var player: CharacterBody2D
-var upgrade_manager: Node
 
 func _ready():
 	computer_area.body_entered.connect(_on_computer_area_entered)
 	computer_area.body_exited.connect(_on_computer_area_exited)
 	sell_button.pressed.connect(_on_sell_button_pressed)
 	
-	upgrade_ui.visible = false
+	upgrade_ui.visible = true # Show by default on surface
+	upgrade_ui.purchase_requested.connect(_on_purchase_requested)
+	_update_currency_display()
 	
-	if upgrade_manager:
-		upgrade_ui.initialize()
-		upgrade_ui.purchase_requested.connect(_on_purchase_requested)
-		_update_currency_display()
+	# Give some starting currency for testing
+	if UpgradeManager:
+		UpgradeManager.currency = 500
 	
 func _on_computer_area_entered(body: Node2D):
 	if body.name == "Player":
@@ -39,13 +39,13 @@ func _process(_delta):
 		
 func _toggle_upgrade_ui():
 	upgrade_ui.visible = not upgrade_ui.visible
-	if upgrade_ui.visible and upgrade_manager:
+	if upgrade_ui.visible:
 		upgrade_ui.refresh_tree()
 		_update_currency_display()
 		
 func _on_purchase_requested(upgrade_id: String):
-	if upgrade_manager:
-		if upgrade_manager.purchase_upgrade(upgrade_id):
+	if UpgradeManager:
+		if UpgradeManager.purchase_upgrade(upgrade_id):
 			print("Purchased upgrade: ", upgrade_id)
 			upgrade_ui.refresh_tree()
 			_update_currency_display()
@@ -53,8 +53,8 @@ func _on_purchase_requested(upgrade_id: String):
 			print("Cannot purchase upgrade: ", upgrade_id)
 			
 func _update_currency_display():
-	if upgrade_manager:
-		currency_label.text = "Credits: %d" % upgrade_manager.currency
+	if UpgradeManager:
+		currency_label.text = "Credits: %d" % UpgradeManager.currency
 		
 func _on_sell_button_pressed():
 	if not player:
