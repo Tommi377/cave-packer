@@ -5,7 +5,7 @@ class_name OreItem
 
 signal picked_up(ore: OreItem)
 
-@export var ore_type: String = "iron"
+@export var ore_type: String = "IRON_ORE"
 @export var ore_size: int = 3 # Number of cells (1-8)
 @export var base_price: int = 10
 @export var shape_cells: Array[Vector2i] = [] # Grid positions relative to origin
@@ -17,6 +17,7 @@ var pickup_radius: float = 32.0
 @onready var sprite: ColorRect = $Sprite
 @onready var area: Area2D = $Area2D
 @onready var collision: CollisionShape2D = $CollisionShape2D
+@onready var sprite_2d: Sprite2D = $Sprite2D
 
 func _ready():
 	# Calculate total value
@@ -37,12 +38,13 @@ func _ready():
 	if area:
 		area.body_entered.connect(_on_body_entered)
 
-func initialize(type: String, size: int, price: int, cells: Array[Vector2i], color: Color = Color.WHITE):
+func initialize(type: String, size: int, price: int, cells: Array[Vector2i], atlas_coord: Vector2i, color: Color = Color.WHITE):
 	ore_type = type
 	ore_size = size
 	base_price = price
 	shape_cells = cells.duplicate()
 	ore_color = color
+	sprite_2d.texture.region = Rect2(Vector2(atlas_coord) * Vector2(16, 16), Vector2(16, 16))
 	total_value = base_price * size
 	
 	_set_ore_color()

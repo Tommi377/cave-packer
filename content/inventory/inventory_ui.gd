@@ -434,7 +434,7 @@ func _spawn_ore_in_world(ore_data: Dictionary) -> void:
 		ore_instance.global_position = player_reference.global_position + spawn_offset
 	
 	ore_instance.initialize(
-		ore_data.get("type", "iron"),
+		ore_data.get("type", "IRON_ORE"),
 		ore_data.get("size", 1),
 		ore_data.get("price", 10),
 		ore_data.get("shape", [Vector2i(0, 0)]),

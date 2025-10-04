@@ -1,16 +1,15 @@
 extends TileMapLayer
 class_name MineTilemap
 
+@onready var ore_tilemap: TileMapLayer = $OreTilemap
+@onready var fog_tilemap: TileMapLayer = $FogTilemap
+
 ## Tile types (atlas coordinates)
-enum TileType {
-	AIR = -1,
-	DIRT = 0,
-	STONE = 1,
-	IRON_ORE = 2,
-	GOLD_ORE = 3,
-	COPPER_ORE = 4,
-	DIAMOND_ORE = 5,
-	BEDROCK = 6
+const ORE_ATLAS = {
+	"IRON_ORE": Vector2i(0, 4),
+	"COPPER_ORE": Vector2i(1, 4),
+	"GOLD_ORE": Vector2i(2, 4),
+	"DIAMOND_ORE": Vector2i(3, 4),
 }
 
 ## Depth zones (measured in tiles from surface)
@@ -20,95 +19,22 @@ const DEEP_DEPTH = 40
 
 ## Ore spawn chances by depth
 const ORE_SPAWN_CHANCE = {
-	"surface": {"stone": 0.95, "iron": 0.05},
-	"mid": {"stone": 0.70, "iron": 0.20, "copper": 0.08, "gold": 0.02},
-	"deep": {"stone": 0.50, "iron": 0.25, "copper": 0.15, "gold": 0.08, "diamond": 0.02}
+	"surface": {"STONE": 0.95, "IRON_ORE": 0.04, "COPPER_ORE": 0.01},
+	"mid": {"STONE": 0.90, "IRON_ORE": 0.04, "COPPER_ORE": 0.04, "GOLD_ORE": 0.02},
+	"deep": {"STONE": 0.78, "IRON_ORE": 0.05, "COPPER_ORE": 0.10, "GOLD_ORE": 0.05, "DIAMOND_ORE": 0.02}
 }
 
 ## Ore drop scene
 const ORE_ITEM_SCENE = preload("res://content/world/ore_item.tscn")
 
 signal block_broken(tile_pos: Vector2i, ore_type: String)
-signal depth_changed(depth: int)
 
 func _ready() -> void:
 	add_to_group("tilemap")
 	
-	# Setup TileSet if not configured
-	if tile_set == null or tile_set.get_physics_layers_count() == 0:
-		_setup_tileset()
-	
 	# Generate initial mine if empty
 	if get_used_cells().is_empty():
 		generate_mine()
-
-## Setup a basic TileSet programmatically
-func _setup_tileset() -> void:
-	# Create TileSet if needed
-	if tile_set == null:
-		tile_set = TileSet.new()
-	
-	# Setup physics layer
-	if tile_set.get_physics_layers_count() == 0:
-		tile_set.add_physics_layer()
-		tile_set.set_physics_layer_collision_layer(0, 1) # Layer 1 for world
-	
-	# Create atlas source if needed
-	var atlas_source_id = 0
-	var atlas: TileSetAtlasSource
-	
-	if tile_set.has_source(atlas_source_id):
-		atlas = tile_set.get_source(atlas_source_id)
-	else:
-		atlas = TileSetAtlasSource.new()
-		
-		# Create a texture atlas with colored tiles (7 tiles x 1 row = 112x16 pixels)
-		var image = Image.create(112, 16, false, Image.FORMAT_RGBA8)
-		
-		# Fill with tile colors
-		var colors = [
-			Color(0.4, 0.3, 0.2), # 0: Dirt (brown)
-			Color(0.5, 0.5, 0.5), # 1: Stone (gray)
-			Color(0.7, 0.6, 0.5), # 2: Iron ore (brown-gray)
-			Color(0.9, 0.8, 0.2), # 3: Gold ore (golden)
-			Color(0.8, 0.5, 0.3), # 4: Copper ore (orange)
-			Color(0.3, 0.8, 0.9), # 5: Diamond ore (cyan)
-			Color(0.2, 0.2, 0.2) # 6: Bedrock (dark gray/black)
-		]
-		
-		for i in range(7):
-			image.fill_rect(Rect2i(i * 16, 0, 16, 16), colors[i])
-		
-		var texture = ImageTexture.create_from_image(image)
-		atlas.texture = texture
-		atlas.texture_region_size = Vector2i(16, 16)
-		
-		tile_set.add_source(atlas, atlas_source_id)
-	
-	# Define tiles with collision
-	var tile_coords = [
-		Vector2i(0, 0), # Dirt
-		Vector2i(1, 0), # Stone
-		Vector2i(2, 0), # Iron ore
-		Vector2i(3, 0), # Gold ore
-		Vector2i(4, 0), # Copper ore
-		Vector2i(5, 0), # Diamond ore
-		Vector2i(6, 0) # Bedrock
-	]
-	
-	for coords in tile_coords:
-		if not atlas.has_tile(coords):
-			atlas.create_tile(coords)
-			
-			# Add collision shape (full 16x16 square)
-			var tile_data = atlas.get_tile_data(coords, 0)
-			if tile_data:
-				tile_data.set_collision_polygons_count(0, 1)
-				var collision_polygon = PackedVector2Array([
-					Vector2(-8, -8), Vector2(8, -8),
-					Vector2(8, 8), Vector2(-8, 8)
-				])
-				tile_data.set_collision_polygon_points(0, 0, collision_polygon)
 
 ## Generate the mine shaft
 func generate_mine(width: int = 40, depth: int = 60) -> void:
@@ -118,21 +44,24 @@ func generate_mine(width: int = 40, depth: int = 60) -> void:
 	# Generate from top (y=0) to bottom
 	for y in range(depth):
 		for x in range(width):
-			var tile_type = _get_tile_for_depth(y)
-			var atlas_coords = _tile_type_to_atlas(tile_type)
-			set_cell(Vector2i(x, y), 0, atlas_coords)
+			set_cells_terrain_connect([Vector2i(x, y)], 0, 0, false)
+			
+			var ore_type := _get_tile_for_depth(y)
+			if ore_type != "STONE":
+				ore_tilemap.set_cell(Vector2i(x, y), 0, ORE_ATLAS[ore_type])
+				pass
+			if y > 0:
+				fog_tilemap.set_cell(Vector2i(x, y), 0, Vector2i(0, 5))
 	
-	# Create surface platform (y = -1)
-	for x in range(width):
-		var center_x = floori(width * 0.5)
-		if x == center_x or x == center_x - 1:
-			continue
-		set_cell(Vector2i(x, -1), 0, Vector2i(6, 0)) # Bedrock
+	#set_cells_terrain_connect(get_used_cells(), 0, 0)
 	
 	print("Mine generated: ", width, "x", depth, " tiles")
 
 ## Get appropriate tile type based on depth
 func _get_tile_for_depth(depth_y: int) -> String:
+	if depth_y == 0:
+		return "STONE"
+	
 	var zone = _get_depth_zone(depth_y)
 	var chances = ORE_SPAWN_CHANCE[zone]
 	
@@ -145,7 +74,7 @@ func _get_tile_for_depth(depth_y: int) -> String:
 		if roll <= cumulative:
 			return ore_type
 	
-	return "stone" # Fallback
+	return "STONE" # Fallback
 
 ## Determine depth zone
 func _get_depth_zone(depth_y: int) -> String:
@@ -155,22 +84,6 @@ func _get_depth_zone(depth_y: int) -> String:
 		return "mid"
 	else:
 		return "deep"
-
-## Convert ore type string to atlas coordinates
-func _tile_type_to_atlas(ore_type: String) -> Vector2i:
-	match ore_type:
-		"stone":
-			return Vector2i(1, 0)
-		"iron":
-			return Vector2i(2, 0)
-		"gold":
-			return Vector2i(3, 0)
-		"copper":
-			return Vector2i(4, 0)
-		"diamond":
-			return Vector2i(5, 0)
-		_:
-			return Vector2i(0, 0) # Dirt fallback
 
 ## Break a tile at world position
 func break_tile_at_position(world_pos: Vector2) -> bool:
@@ -183,44 +96,28 @@ func break_tile(tile_pos: Vector2i) -> bool:
 	if tile_data == null:
 		return false # No tile here
 	
+	print(JSON.from_native(tile_data))
+	
 	# Check if tile is bedrock (unbreakable)
-	var atlas_coords = get_cell_atlas_coords(tile_pos)
-	if atlas_coords == Vector2i(6, 0): # Bedrock
-		print("Can't break bedrock!")
-		return false
+	var atlas_coords = ore_tilemap.get_cell_atlas_coords(tile_pos)
 	
 	# Determine ore type from atlas coords
 	var ore_type = _atlas_to_ore_type(atlas_coords)
 	
-	# Erase the tile
-	erase_cell(tile_pos)
+	set_cells_terrain_connect([tile_pos], 0, -1, false)
+	ore_tilemap.erase_cell(tile_pos)
 	
 	# Only spawn ore drops for actual ore blocks (not stone)
-	if ore_type != "stone":
+	if ore_type != "STONE":
 		spawn_ore_drop(map_to_local(tile_pos), ore_type)
+	
+	# Remove fog of war
+	_unfog_area(tile_pos)
 	
 	# Emit signal
 	block_broken.emit(tile_pos, ore_type)
 	
 	return true
-
-## Convert atlas coords to ore type
-func _atlas_to_ore_type(atlas_coords: Vector2i) -> String:
-	match atlas_coords:
-		Vector2i(0, 0):
-			return "stone"
-		Vector2i(1, 0):
-			return "stone"
-		Vector2i(2, 0):
-			return "iron"
-		Vector2i(3, 0):
-			return "gold"
-		Vector2i(4, 0):
-			return "copper"
-		Vector2i(5, 0):
-			return "diamond"
-		_:
-			return "stone"
 
 ## Spawn an ore drop entity with random size and shape
 func spawn_ore_drop(world_pos: Vector2, ore_type: String) -> void:
@@ -232,7 +129,7 @@ func spawn_ore_drop(world_pos: Vector2, ore_type: String) -> void:
 	var ore_data = OreGenerator.generate_ore_data(ore_type)
 	
 	# Create ore instance
-	var ore = ORE_ITEM_SCENE.instantiate()
+	var ore: OreItem = ORE_ITEM_SCENE.instantiate()
 	get_parent().add_child(ore)
 	ore.global_position = world_pos
 	
@@ -242,6 +139,7 @@ func spawn_ore_drop(world_pos: Vector2, ore_type: String) -> void:
 		ore_data.size,
 		ore_data.base_price,
 		ore_data.shape,
+		ore_data.atlas_coord,
 		ore_data.color
 	)
 	
@@ -273,3 +171,20 @@ func get_tiles_in_radius(world_pos: Vector2, radius: float) -> Array[Vector2i]:
 					tiles.append(tile_pos)
 	
 	return tiles
+
+func _unfog_area(tile_pos: Vector2i) -> void:
+	var surrounding := get_surrounding_cells(tile_pos)
+	surrounding.append_array([
+		tile_pos + Vector2i(1, 1),
+		tile_pos + Vector2i(-1, -1),
+		tile_pos + Vector2i(-1, 1),
+		tile_pos + Vector2i(1, -1),
+	])
+	for tile in surrounding:
+		fog_tilemap.erase_cell(tile)
+
+func _atlas_to_ore_type(atlas_coords: Vector2i) -> String:
+	var type = ORE_ATLAS.find_key(atlas_coords);
+	if not type:
+		return "STONE"
+	return type

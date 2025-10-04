@@ -5,10 +5,10 @@ class_name OreGenerator
 
 # Ore tier definitions (only valuable ores, stone drops nothing)
 const ORE_TIERS = {
-	"iron": {"base_price": 15, "weight": 50, "color": Color(0.7, 0.6, 0.5)},
-	"copper": {"base_price": 25, "weight": 30, "color": Color(0.8, 0.5, 0.3)},
-	"gold": {"base_price": 50, "weight": 15, "color": Color(0.9, 0.8, 0.2)},
-	"diamond": {"base_price": 100, "weight": 5, "color": Color(0.3, 0.8, 0.9)}
+	"IRON_ORE": {"base_price": 15, "weight": 50, "atlas_coord": Vector2i(0, 4), "color": Color(0.7, 0.6, 0.5)},
+	"COPPER_ORE": {"base_price": 25, "weight": 30, "atlas_coord": Vector2i(1, 4), "color": Color(0.8, 0.5, 0.3)},
+	"GOLD_ORE": {"base_price": 50, "weight": 15, "atlas_coord": Vector2i(2, 4), "color": Color(0.9, 0.8, 0.2)},
+	"DIAMONG_ORE": {"base_price": 100, "weight": 5, "atlas_coord": Vector2i(3, 4), "color": Color(0.3, 0.8, 0.9)}
 }
 
 # Size distribution (1-8 cells, middle sizes more common)
@@ -37,7 +37,7 @@ static func generate_ore_type() -> String:
 		if roll <= current:
 			return tier
 	
-	return "iron" # Fallback
+	return "IRON_ORE" # Fallback
 
 ## Generate a random ore size based on weights (1-8)
 static func generate_ore_size() -> int:
@@ -96,7 +96,7 @@ static func get_ore_data(ore_type: String) -> Dictionary:
 	if ORE_TIERS.has(ore_type):
 		return ORE_TIERS[ore_type]
 	# Fallback to iron if type not found
-	return ORE_TIERS["iron"]
+	return ORE_TIERS["IRON_ORE"]
 
 ## Create complete ore data package
 static func generate_ore_data(ore_type: String = "") -> Dictionary:
@@ -113,6 +113,7 @@ static func generate_ore_data(ore_type: String = "") -> Dictionary:
 		"size": ore_size,
 		"base_price": tier_data.base_price,
 		"total_value": tier_data.base_price * ore_size,
+		"atlas_coord": tier_data.atlas_coord,
 		"shape": shape,
 		"color": tier_data.color
 	}

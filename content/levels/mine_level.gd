@@ -3,7 +3,7 @@ extends Node2D
 @onready var tilemap: TileMapLayer = $MineTilemap
 @onready var player: Player = $Player
 @onready var camera: Camera2D = $Player/Camera2D
-@onready var inventory_ui: Control = $UILayer/InventoryUI
+@onready var inventory_ui: InventoryUI = $UILayer/InventoryUI
 @onready var deadline_bar: ProgressBar = $UILayer/DeadlineBar
 @onready var deadline_label: Label = $UILayer/DeadlineLabel
 @onready var earnings_label: Label = $UILayer/EarningsLabel
@@ -107,7 +107,7 @@ func _deposit_inventory():
 		return
 	
 	# Calculate total value from inventory
-	var inventory_value = inventory_ui.get_total_value()
+	var inventory_value = inventory_ui.inventory_grid.get_total_value()
 	
 	if inventory_value == 0:
 		print("No ores to deposit")
@@ -118,7 +118,7 @@ func _deposit_inventory():
 		GameManager.deposit_ores(inventory_value)
 	
 	# Clear inventory after successful deposit
-	inventory_ui.clear_all()
+	inventory_ui.inventory_grid.clear_all()
 	print("Deposited inventory worth ", inventory_value, " credits")
 
 func _toggle_upgrade_ui():
