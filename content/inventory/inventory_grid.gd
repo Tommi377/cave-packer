@@ -158,9 +158,22 @@ func get_total_value() -> int:
 				var item_id = str(ore_data.get("grid_position", Vector2i(x, y)))
 				if not counted_items.has(item_id):
 					counted_items[item_id] = true
-					total += ore_data.get("value", 0)
+					total += ore_data.get("total_value", 0) # Use total_value from ore
 	
 	return total
+
+## Try to automatically add an ore to inventory (finds first available spot)
+func try_add_ore(ore_data: Dictionary) -> bool:
+	# Try all rotations and positions
+	for rotation in range(4):
+		for y in range(grid_height):
+			for x in range(grid_width):
+				if place_item(ore_data, Vector2i(x, y), rotation):
+					return true
+	
+	# No space found
+	grid_full.emit()
+	return false
 
 ## Clear entire inventory
 func clear_all() -> void:

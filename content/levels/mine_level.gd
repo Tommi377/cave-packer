@@ -98,14 +98,22 @@ func _on_computer_area_exited(body: Node2D):
 			upgrade_ui.visible = false
 
 func _deposit_inventory():
-	# TODO: Calculate inventory value when ore collection is implemented
-	var inventory_value = 50 # Placeholder value
+	if not inventory_ui:
+		return
 	
+	# Calculate total value from inventory
+	var inventory_value = inventory_ui.get_total_value()
+	
+	if inventory_value == 0:
+		print("No ores to deposit")
+		return
+	
+	# Deposit to GameManager
 	if GameManager:
 		GameManager.deposit_ores(inventory_value)
 	
-	# Clear inventory after deposit
-	# TODO: Actually clear the inventory UI grid
+	# Clear inventory after successful deposit
+	inventory_ui.clear_all()
 	print("Deposited inventory worth ", inventory_value, " credits")
 
 func _toggle_upgrade_ui():
@@ -144,8 +152,9 @@ func _update_deadline_display(current: float, max_value: float):
 			deadline_bar.modulate = Color.RED
 	
 	if deadline_label:
-		var minutes = int(current) / 60
-		var seconds = int(current) % 60
+		var total_seconds = int(current)
+		var minutes = floori(total_seconds / 60.0)
+		var seconds = total_seconds % 60
 		deadline_label.text = "Time: %d:%02d" % [minutes, seconds]
 
 func _update_earnings_display():

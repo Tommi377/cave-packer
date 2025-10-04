@@ -236,6 +236,10 @@ func can_accept_item(ore_data: Dictionary) -> bool:
 	var shape = ore_data.get("shape", [Vector2i(0, 0)])
 	return inventory_grid.has_space_for(shape)
 
+func try_add_ore(ore_data: Dictionary) -> bool:
+	"""Try to automatically add ore to inventory, finding available space"""
+	return inventory_grid.try_add_ore(ore_data)
+
 func get_total_value() -> int:
 	return inventory_grid.get_total_value()
 
@@ -244,3 +248,7 @@ func clear_inventory() -> void:
 	held_item = {}
 	held_rotation = 0
 	_update_ui()
+
+func clear_all() -> void:
+	"""Alias for clear_inventory for consistency"""
+	clear_inventory()

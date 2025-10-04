@@ -23,15 +23,9 @@ const ORE_SPAWN_CHANCE = {
 	"deep": {"stone": 0.50, "iron": 0.20, "gold": 0.15, "crystal": 0.15}
 }
 
-## Ore drop scene paths (lazy loaded)
-const ORE_SCENE_PATHS = {
-	"stone": "res://content/world/ores/ore_stone.tscn",
-	"iron": "res://content/world/ores/ore_iron.tscn",
-	"gold": "res://content/world/ores/ore_gold.tscn",
-	"crystal": "res://content/world/ores/ore_crystal.tscn",
-}
-
-var ore_scenes = {}
+## Ore drop scene
+const ORE_ITEM_SCENE = preload("res://content/world/ore_item.tscn")
+const OreGenerator = preload("res://content/world/ore_generator.gd")
 
 signal block_broken(tile_pos: Vector2i, ore_type: String)
 signal depth_changed(depth: int)
@@ -42,12 +36,6 @@ func _ready() -> void:
 	# Setup TileSet if not configured
 	if tile_set == null or tile_set.get_physics_layers_count() == 0:
 		_setup_tileset()
-	
-	# Load ore scenes if they exist
-	for ore_type in ORE_SCENE_PATHS:
-		var path = ORE_SCENE_PATHS[ore_type]
-		if ResourceLoader.exists(path):
-			ore_scenes[ore_type] = load(path)
 	
 	# Generate initial mine if empty
 	if get_used_cells().is_empty():
@@ -78,11 +66,11 @@ func _setup_tileset() -> void:
 		
 		# Fill with tile colors
 		var colors = [
-			Color(0.4, 0.3, 0.2),      # 0: Dirt (brown)
-			Color(0.5, 0.5, 0.5),      # 1: Stone (gray)
-			Color(0.8, 0.5, 0.3),      # 2: Iron ore (orange)
-			Color(0.8, 0.7, 0.2),      # 3: Gold ore (golden)
-			Color(0.3, 0.7, 0.9)       # 4: Crystal ore (cyan)
+			Color(0.4, 0.3, 0.2), # 0: Dirt (brown)
+			Color(0.5, 0.5, 0.5), # 1: Stone (gray)
+			Color(0.8, 0.5, 0.3), # 2: Iron ore (orange)
+			Color(0.8, 0.7, 0.2), # 3: Gold ore (golden)
+			Color(0.3, 0.7, 0.9) # 4: Crystal ore (cyan)
 		]
 		
 		for i in range(5):
@@ -100,7 +88,7 @@ func _setup_tileset() -> void:
 		Vector2i(1, 0), # Stone
 		Vector2i(2, 0), # Iron ore
 		Vector2i(3, 0), # Gold ore
-		Vector2i(4, 0)  # Crystal ore
+		Vector2i(4, 0) # Crystal ore
 	]
 	
 	for coords in tile_coords:
@@ -216,21 +204,30 @@ func _atlas_to_ore_type(atlas_coords: Vector2i) -> String:
 		_:
 			return "stone"
 
-## Spawn an ore drop entity
-func spawn_ore_drop(world_pos: Vector2, ore_type: String) -> void:
-	# Check if we have the ore scene
-	if not ore_scenes.has(ore_type) or ore_scenes[ore_type] == null:
-		print("No ore scene for type: ", ore_type)
+## Spawn an ore drop entity with random size and shape
+func spawn_ore_drop(world_pos: Vector2, _ore_type: String) -> void:
+	if not ORE_ITEM_SCENE:
+		print("ORE_ITEM_SCENE not loaded!")
 		return
 	
-	var ore = ore_scenes[ore_type].instantiate()
+	# Generate random ore data
+	var ore_data = OreGenerator.generate_ore_data()
+	
+	# Create ore instance
+	var ore = ORE_ITEM_SCENE.instantiate()
 	get_parent().add_child(ore)
 	ore.global_position = world_pos
 	
-	# Add some random velocity for juice
-	if ore.has_method("apply_drop_impulse"):
-		var impulse = Vector2(randf_range(-50, 50), randf_range(-100, -50))
-		ore.apply_drop_impulse(impulse)
+	# Initialize with generated data
+	ore.initialize(
+		ore_data.type,
+		ore_data.size,
+		ore_data.base_price,
+		ore_data.shape
+	)
+	
+	print("Spawned ", ore_data.type, " ore (size: ", ore_data.size, ", value: $", ore_data.total_value, ")")
+
 
 ## Check if a tile exists at position
 func has_tile_at(world_pos: Vector2) -> bool:

@@ -185,10 +185,20 @@ func take_damage(_amount: int) -> void:
 	# Implement damage system
 	pass
 
-func collect_ore(ore_data: Dictionary) -> void:
+## Called by OreItem when player touches it
+func collect_ore(ore: Node2D) -> void:
+	if not ore or not ore.has_method("get_inventory_data"):
+		return
+	
+	var ore_data = ore.get_inventory_data()
+	
 	# Try to add ore to inventory
-	if inventory_ui != null and inventory_ui.has_method("pick_up_item"):
-		inventory_ui.pick_up_item(ore_data)
-		print("Collected ore: ", ore_data.get("type", "unknown"), " (value: $", ore_data.get("value", 0), ")")
+	if inventory_ui != null and inventory_ui.has_method("try_add_ore"):
+		var added = inventory_ui.try_add_ore(ore_data)
+		if added:
+			print("Collected ", ore_data.type, " ore (size: ", ore_data.size, ", value: $", ore_data.total_value, ")")
+			ore.queue_free() # Remove ore from world
+		else:
+			print("Inventory full! Cannot collect ore.")
 	else:
 		print("No inventory available to collect ore!")
