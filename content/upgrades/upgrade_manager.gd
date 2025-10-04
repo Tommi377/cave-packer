@@ -6,9 +6,6 @@ extends Node
 signal upgrade_purchased(upgrade_id: String, new_level: int)
 signal stats_changed()
 
-## Currency
-var currency: int = 0
-
 ## All available upgrades (upgrade_id -> UpgradeData)
 var upgrades: Dictionary = {}
 
@@ -20,53 +17,55 @@ func _ready() -> void:
 
 ## Initialize all available upgrades
 func _initialize_upgrades() -> void:
-	# Backpack upgrades
-	_add_upgrade("backpack_1", "Bigger Backpack", "Expand inventory to 6×6", 50, 
-		"Backpack", "grid_size", 1.0, Vector2i(0, 0), [])
-	_add_upgrade("backpack_2", "Large Backpack", "Expand inventory to 7×7", 100, 
-		"Backpack", "grid_size", 1.0, Vector2i(0, 1), ["backpack_1"])
-	_add_upgrade("backpack_3", "Huge Backpack", "Expand inventory to 8×8", 200, 
-		"Backpack", "grid_size", 1.0, Vector2i(0, 2), ["backpack_2"])
+	# Backpack upgrades (each level adds +1 to grid size)
+	_add_upgrade("backpack_1", "Bigger Backpack", "Expand inventory to 6×6", 50,
+		"Backpack", "grid_size", 1.0, Vector2i(0, 0), [], 1, 50)
+	_add_upgrade("backpack_2", "Large Backpack", "Expand inventory to 7×7", 100,
+		"Backpack", "grid_size", 1.0, Vector2i(0, 1), ["backpack_1"], 1, 100)
+	_add_upgrade("backpack_3", "Huge Backpack", "Expand inventory up to 10×10", 200,
+		"Backpack", "grid_size", 1.0, Vector2i(0, 2), ["backpack_2"], 3, 150)
 	
-	# Oxygen upgrades
-	_add_upgrade("oxygen_1", "O2 Tank I", "Increase oxygen capacity by 30s", 75, 
-		"Oxygen", "oxygen_max", 30.0, Vector2i(1, 0), [])
-	_add_upgrade("oxygen_2", "O2 Tank II", "Increase oxygen capacity by 60s", 150, 
-		"Oxygen", "oxygen_max", 60.0, Vector2i(1, 1), ["oxygen_1"])
-	_add_upgrade("oxygen_3", "O2 Tank III", "Increase oxygen capacity by 90s", 300, 
-		"Oxygen", "oxygen_max", 90.0, Vector2i(1, 2), ["oxygen_2"])
+	# Oxygen upgrades (each level adds +30s)
+	_add_upgrade("oxygen_1", "O2 Tank I", "Increase oxygen capacity", 75,
+		"Oxygen", "oxygen_max", 30.0, Vector2i(1, 0), [], 3, 75)
+	_add_upgrade("oxygen_2", "O2 Tank II", "Further increase oxygen", 150,
+		"Oxygen", "oxygen_max", 60.0, Vector2i(1, 1), ["oxygen_1"], 3, 100)
+	_add_upgrade("oxygen_3", "O2 Tank III", "Maximum oxygen boost", 300,
+		"Oxygen", "oxygen_max", 90.0, Vector2i(1, 2), ["oxygen_2"], 3, 150)
 	
 	# Pickaxe upgrades
-	_add_upgrade("pickaxe_speed_1", "Fast Swing", "Mine 20% faster", 60, 
-		"Pickaxe", "pickaxe_speed", 0.2, Vector2i(2, 0), [])
-	_add_upgrade("pickaxe_speed_2", "Rapid Swing", "Mine 40% faster", 120, 
-		"Pickaxe", "pickaxe_speed", 0.2, Vector2i(2, 1), ["pickaxe_speed_1"])
-	_add_upgrade("pickaxe_power_1", "Power Strike", "Break multiple blocks", 200, 
-		"Pickaxe", "pickaxe_power", 1.0, Vector2i(3, 1), ["pickaxe_speed_1"])
+	_add_upgrade("pickaxe_speed_1", "Fast Swing", "Mine faster", 60,
+		"Pickaxe", "pickaxe_speed", 0.2, Vector2i(2, 0), [], 3, 60)
+	_add_upgrade("pickaxe_speed_2", "Rapid Swing", "Mine even faster", 120,
+		"Pickaxe", "pickaxe_speed", 0.2, Vector2i(2, 1), ["pickaxe_speed_1"], 3, 80)
+	_add_upgrade("pickaxe_power_1", "Power Strike", "Break multiple blocks", 200,
+		"Pickaxe", "pickaxe_power", 1.0, Vector2i(3, 1), ["pickaxe_speed_1"], 2, 200)
 	
 	# Movement upgrades
-	_add_upgrade("move_speed_1", "Sprint Boots", "Move 15% faster", 80, 
-		"Movement", "move_speed", 0.15, Vector2i(4, 0), [])
-	_add_upgrade("jump_height_1", "Jump Boost", "Jump 20% higher", 100, 
-		"Movement", "jump_height", 0.2, Vector2i(4, 1), [])
-	_add_upgrade("double_jump", "Double Jump", "Jump again in mid-air", 250, 
-		"Movement", "special", 1.0, Vector2i(5, 1), ["jump_height_1"])
+	_add_upgrade("move_speed_1", "Sprint Boots", "Move faster", 80,
+		"Movement", "move_speed", 0.15, Vector2i(4, 0), [], 3, 80)
+	_add_upgrade("jump_height_1", "Jump Boost", "Jump higher", 100,
+		"Movement", "jump_height", 0.2, Vector2i(4, 1), [], 3, 100)
+	_add_upgrade("double_jump", "Double Jump", "Jump again in mid-air", 250,
+		"Movement", "special", 1.0, Vector2i(5, 1), ["jump_height_1"], 1, 250)
 
-func _add_upgrade(id: String, upgrade_name: String, desc: String, cost: int,
-	category: String, type: String, value: float, pos: Vector2i, reqs: Array) -> void:
+func _add_upgrade(id: String, upgrade_name: String, desc: String, base_cost: int,
+	category: String, type: String, value: float, pos: Vector2i, reqs: Array,
+	max_lvl: int, cost_step: int) -> void:
 	# Create upgrade as dictionary (simpler than Resource for now)
 	var upgrade = {
 		"id": id,
 		"display_name": upgrade_name,
 		"description": desc,
-		"cost": cost,
+		"base_cost": base_cost,
+		"cost_step": cost_step, # How much the cost increases per level
 		"category": category,
 		"upgrade_type": type,
 		"value_per_level": value,
 		"tree_position": pos,
 		"required_upgrades": reqs.duplicate(),
 		"current_level": 0,
-		"max_level": 1
+		"max_level": max_lvl
 	}
 	
 	upgrades[id] = upgrade
@@ -74,37 +73,50 @@ func _add_upgrade(id: String, upgrade_name: String, desc: String, cost: int,
 
 ## Attempt to purchase an upgrade
 func purchase_upgrade(upgrade_id: String) -> bool:
+	print("=== Attempting to purchase: ", upgrade_id, " ===")
+	
 	if not upgrades.has(upgrade_id):
-		print("Upgrade not found: ", upgrade_id)
+		print("ERROR: Upgrade not found: ", upgrade_id)
+		return false
+	
+	if not GameManager:
+		push_error("GameManager not found!")
 		return false
 	
 	var upgrade = upgrades[upgrade_id]
+	print("Upgrade info: Level ", upgrade.current_level, "/", upgrade.max_level)
 	
 	# Check if maxed out
 	if upgrade.current_level >= upgrade.max_level:
+		print("ERROR: Already maxed out")
 		return false
 	
-	# Calculate cost (scales with level)
-	var upgrade_cost = upgrade.cost * (upgrade.current_level + 1)
+	# Calculate cost based on level (base_cost + (current_level * cost_step))
+	var upgrade_cost = upgrade.base_cost + (upgrade.current_level * upgrade.cost_step)
+	print("Cost: ", upgrade_cost, " | Available money: ", GameManager.current_day_earnings)
 	
 	# Check if can afford
-	if currency < upgrade_cost:
+	if GameManager.current_day_earnings < upgrade_cost:
+		print("ERROR: Not enough money")
 		return false
 	
 	# Check prerequisites
 	for req_id in upgrade.required_upgrades:
 		if not upgrade_levels.has(req_id) or upgrade_levels[req_id] == 0:
+			print("ERROR: Missing prerequisite: ", req_id)
 			return false
 	
+	print("All checks passed - purchasing!")
+	
 	# Purchase
-	currency -= upgrade_cost
+	GameManager.current_day_earnings -= upgrade_cost
 	upgrade.current_level += 1
 	upgrade_levels[upgrade_id] = upgrade.current_level
 	
 	upgrade_purchased.emit(upgrade_id, upgrade.current_level)
 	stats_changed.emit()
 	
-	print("Purchased upgrade: ", upgrade_id, " Level: ", upgrade.current_level, " Cost: ", upgrade_cost)
+	print("SUCCESS: Purchased upgrade: ", upgrade_id, " Level: ", upgrade.current_level, " Cost: ", upgrade_cost)
 	return true
 
 ## Get all upgrades in a category
@@ -133,14 +145,17 @@ func has_upgrade(upgrade_id: String) -> bool:
 func get_upgrade_level(upgrade_id: String) -> int:
 	return upgrade_levels.get(upgrade_id, 0)
 
-## Add currency (from selling ores)
-func add_currency(amount: int) -> void:
-	currency += amount
-	print("Currency added: ", amount, " | Total: ", currency)
-
-## Sell all ores from inventory
-func sell_inventory(inventory_value: int) -> void:
-	add_currency(inventory_value)
+## Get the cost of the next level for an upgrade
+func get_upgrade_cost(upgrade_id: String) -> int:
+	if not upgrades.has(upgrade_id):
+		return 0
+	
+	var upgrade = upgrades[upgrade_id]
+	if upgrade.current_level >= upgrade.max_level:
+		return 0
+	
+	# Calculate cost: base_cost + (current_level * cost_step)
+	return upgrade.base_cost + (upgrade.current_level * upgrade.cost_step)
 
 ## Get current backpack size
 func get_backpack_size() -> int:
@@ -148,7 +163,7 @@ func get_backpack_size() -> int:
 
 ## Get current oxygen capacity
 func get_oxygen_capacity() -> float:
-	return 120.0 + get_stat_value("oxygen_max")  # Base 120 seconds
+	return 120.0 + get_stat_value("oxygen_max") # Base 120 seconds
 
 ## Get pickaxe speed multiplier
 func get_pickaxe_speed_multiplier() -> float:
@@ -165,12 +180,10 @@ func get_jump_height_multiplier() -> float:
 ## Save/Load system
 func get_save_data() -> Dictionary:
 	return {
-		"currency": currency,
 		"upgrade_levels": upgrade_levels.duplicate()
 	}
 
 func load_save_data(data: Dictionary) -> void:
-	currency = data.get("currency", 0)
 	var saved_levels = data.get("upgrade_levels", {})
 	
 	for upgrade_id in saved_levels:

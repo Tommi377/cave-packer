@@ -134,8 +134,6 @@ func break_tile(tile_pos: Vector2i) -> bool:
 	if tile_data == null:
 		return false # No tile here
 	
-	print(JSON.from_native(tile_data))
-	
 	# Check if tile is bedrock (unbreakable)
 	var atlas_coords = ore_tilemap.get_cell_atlas_coords(tile_pos)
 	

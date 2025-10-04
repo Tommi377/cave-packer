@@ -10,7 +10,7 @@ extends Node2D
 @onready var goal_label: Label = $UILayer/GoalLabel
 @onready var deposit_box_area: Area2D = $DepositBox/Area2D
 @onready var computer_area: Area2D = $SurfaceComputer/Area2D
-@onready var upgrade_ui: Control = $UILayer/UpgradeUI
+@onready var upgrade_ui: SkillTreeUI = $UILayer/UpgradeUI
 
 var player_near_deposit: bool = false
 var player_near_computer: bool = false
@@ -50,6 +50,7 @@ func _ready() -> void:
 	# Hide upgrade UI initially
 	if upgrade_ui:
 		upgrade_ui.visible = false
+		upgrade_ui.purchase_requested.connect(_on_purchase_requested)
 	
 	# Start the day
 	if GameManager and not GameManager.current_day_active:
@@ -122,6 +123,7 @@ func _deposit_inventory():
 	print("Deposited inventory worth ", inventory_value, " credits")
 
 func _toggle_upgrade_ui():
+	upgrade_ui.refresh_tree()
 	if upgrade_ui:
 		upgrade_ui.visible = not upgrade_ui.visible
 
@@ -168,3 +170,11 @@ func _update_earnings_display():
 			earnings_label.text = "Earnings: $%d" % GameManager.current_day_earnings
 		if goal_label:
 			goal_label.text = "Goal: $%d" % GameManager.money_goal
+
+func _on_purchase_requested(upgrade_id: String):
+	if UpgradeManager:
+		if UpgradeManager.purchase_upgrade(upgrade_id):
+			print("Purchased upgrade: ", upgrade_id)
+			upgrade_ui.refresh_tree()
+		else:
+			print("Cannot purchase upgrade: ", upgrade_id)

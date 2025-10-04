@@ -15,9 +15,8 @@ var max_time: float = 300.0
 var time_running: bool = false
 
 ## Money tracking
-var current_day_earnings: int = 0
+var current_day_earnings: int = 0 # Total money the player has (persistent wallet)
 var money_goal: int = 500 # Goal for the current day
-var leftover_money: int = 0 # Money saved from previous days for upgrades
 
 ## Scene references
 const MINE_SCENE = "res://content/levels/mine_level.tscn"
@@ -40,9 +39,10 @@ func start_day():
 	current_time = max_time
 	current_day_active = true
 	time_running = true
-	current_day_earnings = 0
+	# DON'T reset current_day_earnings - it's the player's persistent wallet!
 	
 	print("Day started! Time limit: ", max_time, " seconds")
+	print("Current money: ", current_day_earnings)
 	day_started.emit()
 
 ## End the current day (called when timer runs out)
@@ -55,20 +55,12 @@ func end_day():
 	
 	var goal_met = current_day_earnings >= money_goal
 	
-	print("Day ended. Earnings: ", current_day_earnings, " / Goal: ", money_goal)
+	print("Day ended. Total money: ", current_day_earnings, " / Goal: ", money_goal)
 	
 	if goal_met:
-		# Goal reached - leftover goes to upgrades
-		leftover_money += current_day_earnings - money_goal
-		print("Goal reached! Leftover for upgrades: ", leftover_money)
-		if UpgradeManager:
-			UpgradeManager.currency = leftover_money
+		print("Goal reached! You can continue.")
 	else:
-		# Goal not reached - game over or try again
 		print("Goal not reached. Day failed.")
-		# Keep leftover money but don't add to it
-		if UpgradeManager:
-			UpgradeManager.currency = leftover_money
 	
 	day_ended.emit(goal_met)
 

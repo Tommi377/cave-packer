@@ -12,17 +12,17 @@ func _ready():
 	upgrade_ui.purchase_requested.connect(_on_purchase_requested)
 	_update_currency_display()
 	
-	# Listen for run ended to refresh UI
+	# Listen for day ended to refresh UI
 	if GameManager:
-		GameManager.run_ended.connect(_on_run_ended)
+		GameManager.day_ended.connect(_on_day_ended)
 	
 	# Give some starting currency for testing (first time only)
-	if UpgradeManager and UpgradeManager.currency == 0:
-		UpgradeManager.currency = 100
+	if GameManager and GameManager.current_day_earnings == 0:
+		GameManager.current_day_earnings = 500
 		
 func _on_start_run_pressed():
 	if GameManager:
-		GameManager.start_run()
+		GameManager.start_day()
 	else:
 		push_error("GameManager not found!")
 		
@@ -36,15 +36,15 @@ func _on_purchase_requested(upgrade_id: String):
 			print("Cannot purchase upgrade: ", upgrade_id)
 			
 func _update_currency_display():
-	if UpgradeManager:
-		currency_label.text = "Credits: %d" % UpgradeManager.currency
+	if GameManager:
+		currency_label.text = "Credits: %d" % GameManager.current_day_earnings
 
-func _on_run_ended(success: bool):
-	# Refresh currency display after run
+func _on_day_ended(goal_reached: bool):
+	# Refresh currency display after day
 	_update_currency_display()
 	upgrade_ui.refresh_tree()
 	
-	if success:
-		print("Run successful! Inventory sold.")
+	if goal_reached:
+		print("Day successful! Goal reached.")
 	else:
-		print("Run failed! Inventory lost.")
+		print("Day failed! Goal not reached.")
