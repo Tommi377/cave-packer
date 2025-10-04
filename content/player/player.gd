@@ -130,16 +130,28 @@ func swing_pickaxe() -> void:
 	is_attacking = false
 
 func detect_and_break_blocks() -> void:
-	# Calculate the position to check for blocks based on facing direction
-	var check_offset := Vector2(pickaxe_range if facing_right else -pickaxe_range, 0)
-	var check_position := global_position + check_offset
+	# Determine mining direction based on input
+	var mine_direction := Vector2.ZERO
+	
+	# Check for directional input
+	if Input.is_action_pressed("move_up"):
+		# Mining upward
+		mine_direction = Vector2(0, -16) # One tile up (16 pixels)
+	elif Input.is_action_pressed("move_down"):
+		# Mining downward
+		mine_direction = Vector2(0, 16) # One tile down
+	else:
+		# Mining forward (left or right based on facing direction)
+		mine_direction = Vector2(16 if facing_right else -16, 0)
+	
+	var check_position := global_position + mine_direction
 	
 	# Find the tilemap in the scene
 	var tilemap = get_tree().get_first_node_in_group("tilemap")
 	if tilemap and tilemap.has_method("break_tile_at_position"):
 		var broke_tile = tilemap.break_tile_at_position(check_position)
 		if broke_tile:
-			print("Broke tile at: ", check_position)
+			print("Broke tile at: ", check_position, " (direction: ", mine_direction, ")")
 		else:
 			print("No tile to break at: ", check_position)
 	else:

@@ -7,7 +7,7 @@
 [sub_resource type="CanvasTexture" id="CanvasTexture_2rga7"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
-size = Vector2(16, 24)
+size = Vector2(12, 12)
 
 [sub_resource type="Animation" id="Animation_2rga7"]
 length = 0.001
@@ -85,13 +85,13 @@ z_index = 1
 modulate = Color(0.4, 0.7, 1, 1)
 texture = SubResource("CanvasTexture_3vyb7")
 region_enabled = true
-region_rect = Rect2(0, 0, 16, 24)
+region_rect = Rect2(0, 0, 12, 12)
 
 [node name="Pickaxe" type="Sprite2D" parent="Visual"]
 modulate = Color(0.31308666, 0.16161871, 1.2032687e-07, 1)
 position = Vector2(11.328146, 0.7371212)
 rotation = -0.49702013
-scale = Vector2(20.797216, 5.5)
+scale = Vector2(14.422941, 3.593186)
 texture = SubResource("CanvasTexture_2rga7")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
