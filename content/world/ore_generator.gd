@@ -3,13 +3,12 @@ class_name OreGenerator
 
 ## Generates randomized ore shapes with connected cells
 
-# Ore tier definitions
+# Ore tier definitions (only valuable ores, stone drops nothing)
 const ORE_TIERS = {
-	"stone": {"base_price": 5, "weight": 50, "color": Color(0.5, 0.5, 0.5)},
-	"iron": {"base_price": 15, "weight": 30, "color": Color(0.7, 0.6, 0.5)},
-	"copper": {"base_price": 25, "weight": 15, "color": Color(0.8, 0.5, 0.3)},
-	"gold": {"base_price": 50, "weight": 8, "color": Color(0.9, 0.8, 0.2)},
-	"diamond": {"base_price": 100, "weight": 2, "color": Color(0.3, 0.8, 0.9)}
+	"iron": {"base_price": 15, "weight": 50, "color": Color(0.7, 0.6, 0.5)},
+	"copper": {"base_price": 25, "weight": 30, "color": Color(0.8, 0.5, 0.3)},
+	"gold": {"base_price": 50, "weight": 15, "color": Color(0.9, 0.8, 0.2)},
+	"diamond": {"base_price": 100, "weight": 5, "color": Color(0.3, 0.8, 0.9)}
 }
 
 # Size distribution (1-8 cells, middle sizes more common)
@@ -38,7 +37,7 @@ static func generate_ore_type() -> String:
 		if roll <= current:
 			return tier
 	
-	return "stone" # Fallback
+	return "iron" # Fallback
 
 ## Generate a random ore size based on weights (1-8)
 static func generate_ore_size() -> int:
@@ -96,11 +95,15 @@ static func generate_connected_shape(size: int) -> Array[Vector2i]:
 static func get_ore_data(ore_type: String) -> Dictionary:
 	if ORE_TIERS.has(ore_type):
 		return ORE_TIERS[ore_type]
-	return ORE_TIERS["stone"]
+	# Fallback to iron if type not found
+	return ORE_TIERS["iron"]
 
 ## Create complete ore data package
-static func generate_ore_data() -> Dictionary:
-	var ore_type = generate_ore_type()
+static func generate_ore_data(ore_type: String = "") -> Dictionary:
+	# Use provided ore type or generate random one
+	if ore_type.is_empty():
+		ore_type = generate_ore_type()
+	
 	var ore_size = generate_ore_size()
 	var shape = generate_connected_shape(ore_size)
 	var tier_data = get_ore_data(ore_type)

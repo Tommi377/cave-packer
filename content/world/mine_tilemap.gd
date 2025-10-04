@@ -8,7 +8,9 @@ enum TileType {
 	STONE = 1,
 	IRON_ORE = 2,
 	GOLD_ORE = 3,
-	CRYSTAL_ORE = 4
+	COPPER_ORE = 4,
+	DIAMOND_ORE = 5,
+	BEDROCK = 6
 }
 
 ## Depth zones (measured in tiles from surface)
@@ -19,13 +21,12 @@ const DEEP_DEPTH = 40
 ## Ore spawn chances by depth
 const ORE_SPAWN_CHANCE = {
 	"surface": {"stone": 0.95, "iron": 0.05},
-	"mid": {"stone": 0.70, "iron": 0.25, "gold": 0.05},
-	"deep": {"stone": 0.50, "iron": 0.20, "gold": 0.15, "crystal": 0.15}
+	"mid": {"stone": 0.70, "iron": 0.20, "copper": 0.08, "gold": 0.02},
+	"deep": {"stone": 0.50, "iron": 0.25, "copper": 0.15, "gold": 0.08, "diamond": 0.02}
 }
 
 ## Ore drop scene
 const ORE_ITEM_SCENE = preload("res://content/world/ore_item.tscn")
-const OreGenerator = preload("res://content/world/ore_generator.gd")
 
 signal block_broken(tile_pos: Vector2i, ore_type: String)
 signal depth_changed(depth: int)
@@ -61,19 +62,21 @@ func _setup_tileset() -> void:
 	else:
 		atlas = TileSetAtlasSource.new()
 		
-		# Create a texture atlas with colored tiles (5 tiles x 1 row = 80x16 pixels)
-		var image = Image.create(80, 16, false, Image.FORMAT_RGBA8)
+		# Create a texture atlas with colored tiles (7 tiles x 1 row = 112x16 pixels)
+		var image = Image.create(112, 16, false, Image.FORMAT_RGBA8)
 		
 		# Fill with tile colors
 		var colors = [
 			Color(0.4, 0.3, 0.2), # 0: Dirt (brown)
 			Color(0.5, 0.5, 0.5), # 1: Stone (gray)
-			Color(0.8, 0.5, 0.3), # 2: Iron ore (orange)
-			Color(0.8, 0.7, 0.2), # 3: Gold ore (golden)
-			Color(0.3, 0.7, 0.9) # 4: Crystal ore (cyan)
+			Color(0.7, 0.6, 0.5), # 2: Iron ore (brown-gray)
+			Color(0.9, 0.8, 0.2), # 3: Gold ore (golden)
+			Color(0.8, 0.5, 0.3), # 4: Copper ore (orange)
+			Color(0.3, 0.8, 0.9), # 5: Diamond ore (cyan)
+			Color(0.2, 0.2, 0.2) # 6: Bedrock (dark gray/black)
 		]
 		
-		for i in range(5):
+		for i in range(7):
 			image.fill_rect(Rect2i(i * 16, 0, 16, 16), colors[i])
 		
 		var texture = ImageTexture.create_from_image(image)
@@ -88,7 +91,9 @@ func _setup_tileset() -> void:
 		Vector2i(1, 0), # Stone
 		Vector2i(2, 0), # Iron ore
 		Vector2i(3, 0), # Gold ore
-		Vector2i(4, 0) # Crystal ore
+		Vector2i(4, 0), # Copper ore
+		Vector2i(5, 0), # Diamond ore
+		Vector2i(6, 0) # Bedrock
 	]
 	
 	for coords in tile_coords:
@@ -119,7 +124,10 @@ func generate_mine(width: int = 40, depth: int = 60) -> void:
 	
 	# Create surface platform (y = -1)
 	for x in range(width):
-		set_cell(Vector2i(x, -1), 0, Vector2i(1, 0)) # Stone platform
+		var center_x = floori(width * 0.5)
+		if x == center_x or x == center_x - 1:
+			continue
+		set_cell(Vector2i(x, -1), 0, Vector2i(6, 0)) # Bedrock
 	
 	print("Mine generated: ", width, "x", depth, " tiles")
 
@@ -157,8 +165,10 @@ func _tile_type_to_atlas(ore_type: String) -> Vector2i:
 			return Vector2i(2, 0)
 		"gold":
 			return Vector2i(3, 0)
-		"crystal":
+		"copper":
 			return Vector2i(4, 0)
+		"diamond":
+			return Vector2i(5, 0)
 		_:
 			return Vector2i(0, 0) # Dirt fallback
 
@@ -173,15 +183,21 @@ func break_tile(tile_pos: Vector2i) -> bool:
 	if tile_data == null:
 		return false # No tile here
 	
-	# Determine ore type from atlas coords
+	# Check if tile is bedrock (unbreakable)
 	var atlas_coords = get_cell_atlas_coords(tile_pos)
+	if atlas_coords == Vector2i(6, 0): # Bedrock
+		print("Can't break bedrock!")
+		return false
+	
+	# Determine ore type from atlas coords
 	var ore_type = _atlas_to_ore_type(atlas_coords)
 	
 	# Erase the tile
 	erase_cell(tile_pos)
 	
-	# Spawn ore drop
-	spawn_ore_drop(map_to_local(tile_pos), ore_type)
+	# Only spawn ore drops for actual ore blocks (not stone)
+	if ore_type != "stone":
+		spawn_ore_drop(map_to_local(tile_pos), ore_type)
 	
 	# Emit signal
 	block_broken.emit(tile_pos, ore_type)
@@ -200,18 +216,20 @@ func _atlas_to_ore_type(atlas_coords: Vector2i) -> String:
 		Vector2i(3, 0):
 			return "gold"
 		Vector2i(4, 0):
-			return "crystal"
+			return "copper"
+		Vector2i(5, 0):
+			return "diamond"
 		_:
 			return "stone"
 
 ## Spawn an ore drop entity with random size and shape
-func spawn_ore_drop(world_pos: Vector2, _ore_type: String) -> void:
+func spawn_ore_drop(world_pos: Vector2, ore_type: String) -> void:
 	if not ORE_ITEM_SCENE:
 		print("ORE_ITEM_SCENE not loaded!")
 		return
 	
-	# Generate random ore data
-	var ore_data = OreGenerator.generate_ore_data()
+	# Generate ore data with the specific ore type from the broken block
+	var ore_data = OreGenerator.generate_ore_data(ore_type)
 	
 	# Create ore instance
 	var ore = ORE_ITEM_SCENE.instantiate()
@@ -223,7 +241,8 @@ func spawn_ore_drop(world_pos: Vector2, _ore_type: String) -> void:
 		ore_data.type,
 		ore_data.size,
 		ore_data.base_price,
-		ore_data.shape
+		ore_data.shape,
+		ore_data.color
 	)
 	
 	print("Spawned ", ore_data.type, " ore (size: ", ore_data.size, ", value: $", ore_data.total_value, ")")

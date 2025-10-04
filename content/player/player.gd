@@ -39,7 +39,7 @@ var facing_right: bool = true
 @onready var pickaxe_hitbox: Area2D = $PickaxeHitbox if has_node("PickaxeHitbox") else null
 
 # Inventory reference (set by level controller)
-var inventory_ui: Node = null
+var inventory_ui: InventoryUI = null
 
 func _ready() -> void:
 	# Ensure the player uses the floor detection properly

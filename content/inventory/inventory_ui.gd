@@ -11,7 +11,7 @@ signal close_requested()
 @export var cell_padding: int = 2
 @export var show_grid_lines: bool = true
 
-@onready var inventory_grid: Node = $InventoryGrid
+@onready var inventory_grid: InventoryGrid = $InventoryGrid
 @onready var grid_container: Control = $GridContainer
 @onready var preview_container: Control = $PreviewContainer
 @onready var info_label: Label = $InfoPanel/InfoLabel
