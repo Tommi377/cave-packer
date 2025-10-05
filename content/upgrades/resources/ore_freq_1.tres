@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="UpgradeResource" load_steps=2 format=3 uid="uid://d3ik50s342sjl"]
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=3 format=3 uid="uid://d3ik50s342sjl"]
 
 [ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_4jf1y"]
+[ext_resource type="Resource" uid="uid://bn4n8xosmbg45" path="res://content/upgrades/resources/pickaxe_damage_1.tres" id="2_qqin3"]
 
 [resource]
 script = ExtResource("1_4jf1y")
@@ -9,4 +10,10 @@ display_name = "Ore Prosperity"
 description = "Chance for an ore to spawn increased"
 stat_name = "ore_freq"
 max_level = 1
+currency_costs = Dictionary[String, int]({
+"copper": 25,
+"gold": 10,
+"iron": 50
+})
 value_per_level = 1.0
+required_upgrades = Array[ExtResource("1_4jf1y")]([ExtResource("2_qqin3")])

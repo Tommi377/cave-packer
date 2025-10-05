@@ -38,13 +38,16 @@ func _draw():
 		var to_offset := upgrade_node.size / 2
 		var to_pos := Vector2(upgrade_node.global_position + to_offset)
 		
-		for req_id in upgrade.required_upgrades:
-			if UpgradeManager.get_upgrade_level(req_id) == 0:
-				continue
-			var from_offset := upgrade_buttons[req_id].size / 2
-			var from_pos := Vector2(upgrade_buttons[req_id].global_position + from_offset)
-			
-			# Color based on prerequisite status
-			var req_level = UpgradeManager.get_upgrade_level(req_id)
-			var line_color = Color.GREEN if req_level >= upgrade.required_level else Color.DARK_GRAY
-			draw_line(from_pos, to_pos, line_color, 2.0)
+		var can_render := true
+		for req in upgrade.required_upgrades:
+			if UpgradeManager.get_upgrade_level(req.id) == 0:
+				can_render = false
+				break
+		if can_render:
+			for req in upgrade.required_upgrades:
+				var from_offset := upgrade_buttons[req.id].size / 2
+				var from_pos := Vector2(upgrade_buttons[req.id].global_position + from_offset)
+				
+				# Color based on prerequisite status
+				var line_color = Color.DARK_GRAY
+				draw_line(from_pos, to_pos, line_color, 2.0)

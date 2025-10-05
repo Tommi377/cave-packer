@@ -37,6 +37,7 @@ var air_jumps_used: int = 0 # Track how many air jumps have been used
 # Node references
 @onready var visual: CanvasGroup = %Visual
 @onready var pickaxe_container: Node2D = $Visual/PickaxeContainer
+@onready var pickaxe: Sprite2D = $Visual/PickaxeContainer/Pickaxe
 @onready var animation_player: AnimationPlayer = $AnimationPlayer if has_node("AnimationPlayer") else null
 @onready var walk_animation: AnimationPlayer = $WalkAnimation
 
@@ -68,6 +69,8 @@ func apply_upgrades() -> void:
 	
 	pickaxe_cooldown = UpgradeManager.get_pickaxe_speed_multiplier()
 	pickaxe_damage = UpgradeManager.get_pickaxe_damage()
+	
+	_set_pickaxe_sprite()
 	
 	# Apply movement speed multiplier
 	var speed_multiplier = UpgradeManager.get_move_speed_multiplier()
@@ -258,3 +261,17 @@ func collect_ore(_ore: Node2D) -> void:
 	# Ores are no longer automatically collected
 	# They must be picked up through the inventory UI
 	pass
+
+func _set_pickaxe_sprite() -> void:
+	const base := Vector2i(16, 16)
+	if UpgradeManager.get_upgrade_level('pickaxe_damage_4'):
+		pickaxe.texture.region = Rect2i(Vector2i(7, 6) * base, base)
+	elif UpgradeManager.get_upgrade_level('pickaxe_damage_3'):
+		pickaxe.texture.region = Rect2i(Vector2i(6, 6) * base, base)
+	elif UpgradeManager.get_upgrade_level('pickaxe_damage_2'):
+		pickaxe.texture.region = Rect2i(Vector2i(5, 6) * base, base)
+	elif UpgradeManager.get_upgrade_level('pickaxe_damage_1'):
+		pickaxe.texture.region = Rect2i(Vector2i(4, 6) * base, base)
+		print('gagaa')
+	else:
+		pickaxe.texture.region = Rect2i(Vector2i(3, 6) * base, base)

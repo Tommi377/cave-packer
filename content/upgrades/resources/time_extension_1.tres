@@ -1,19 +1,17 @@
-[gd_resource type="Resource" script_class="UpgradeResource" load_steps=2 format=3 uid="uid://boxamarik0laa"]
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=3 format=3 uid="uid://boxamarik0laa"]
 
 [ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_1pvu0"]
+[ext_resource type="Resource" uid="uid://dhyifha0ixy2w" path="res://content/upgrades/resources/inventory_size_1.tres" id="2_wffvq"]
 
 [resource]
 script = ExtResource("1_1pvu0")
 id = "time_extension_1"
-display_name = "Extended Time I"
+display_name = "Longer Shift"
 description = "Increase run time by +{value} seconds"
 stat_name = "run_time"
 max_level = 6
 currency_costs = {
-"copper": 5,
-"iron": 10
+"copper": 1,
+"iron": 5
 }
-cost_scaling = {
-"copper": 1.5,
-"iron": 1.5
-}
+required_upgrades = Array[ExtResource("1_1pvu0")]([ExtResource("2_wffvq")])

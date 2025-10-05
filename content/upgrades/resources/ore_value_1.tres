@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="UpgradeResource" load_steps=2 format=3 uid="uid://dvehgmkqxq8sf"]
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=3 format=3 uid="uid://dvehgmkqxq8sf"]
 
 [ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_44e4v"]
+[ext_resource type="Resource" uid="uid://dl6d4214art4n" path="res://content/upgrades/resources/inventory_size_3.tres" id="2_mh1ev"]
 
 [resource]
 script = ExtResource("1_44e4v")
@@ -9,4 +10,11 @@ display_name = "Efficient Smelting"
 description = "Gain double the amount of materials from ores"
 stat_name = "ore_value"
 max_level = 1
+currency_costs = Dictionary[String, int]({
+"copper": 80,
+"diamond": 20,
+"gold": 40,
+"iron": 160
+})
 value_per_level = 1.0
+required_upgrades = Array[ExtResource("1_44e4v")]([ExtResource("2_mh1ev")])

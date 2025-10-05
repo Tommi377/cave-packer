@@ -1,12 +1,18 @@
-[gd_resource type="Resource" script_class="UpgradeResource" load_steps=2 format=3 uid="uid://o7qkuo1k484t"]
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=3 format=3 uid="uid://o7qkuo1k484t"]
 
 [ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_hsdhb"]
+[ext_resource type="Resource" uid="uid://dhyifha0ixy2w" path="res://content/upgrades/resources/inventory_size_1.tres" id="2_dfkvy"]
 
 [resource]
 script = ExtResource("1_hsdhb")
 id = "ore_size_1"
 display_name = "Bigger Ores"
-description = "Increase the maximum size of the block by 1"
+description = "Increase the maximum size of ore blocks by 1"
 stat_name = "ore_size"
 max_level = 4
+currency_costs = Dictionary[String, int]({
+"copper": 5,
+"iron": 20
+})
 value_per_level = 1.0
+required_upgrades = Array[ExtResource("1_hsdhb")]([ExtResource("2_dfkvy")])

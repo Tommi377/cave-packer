@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="UpgradeResource" load_steps=2 format=3 uid="uid://dyn21s876envk"]
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=3 format=3 uid="uid://dyn21s876envk"]
 
 [ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_l46gg"]
+[ext_resource type="Resource" uid="uid://dhyifha0ixy2w" path="res://content/upgrades/resources/inventory_size_1.tres" id="2_x8hi6"]
 
 [resource]
 script = ExtResource("1_l46gg")
@@ -9,4 +10,8 @@ display_name = "Faster Swing"
 description = "Reduce swing cooldown by -5%"
 stat_name = "pickaxe_speed"
 max_level = 4
+currency_costs = Dictionary[String, int]({
+"iron": 3
+})
 value_per_level = 0.05
+required_upgrades = Array[ExtResource("1_l46gg")]([ExtResource("2_x8hi6")])

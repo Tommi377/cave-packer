@@ -5,11 +5,11 @@
 [resource]
 script = ExtResource("1_u0pjb")
 id = "inventory_size_1"
-display_name = "Bigger Backpack"
+display_name = "Big Backpack"
 description = "Make your inventory bigger"
 stat_name = "grid_size"
 max_level = 1
 currency_costs = {
-"iron": 4
+"iron": 2
 }
 value_per_level = 1.0

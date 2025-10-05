@@ -1,16 +1,18 @@
-[gd_resource type="Resource" script_class="UpgradeResource" load_steps=2 format=3 uid="uid://c2gs4vjrefosa"]
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=4 format=3 uid="uid://c2gs4vjrefosa"]
 
 [ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_dwdfe"]
+[ext_resource type="Resource" uid="uid://ct2w2q5uan0rp" path="res://content/upgrades/resources/swing_speed_3.tres" id="2_57sys"]
+[ext_resource type="Resource" uid="uid://blvw7500ik6p7" path="res://content/upgrades/resources/ore_size_2.tres" id="3_t0dmu"]
 
 [resource]
 script = ExtResource("1_dwdfe")
 id = "time_extension_3"
-display_name = "Extended Time III"
-description = "Maximum time extension: +{value} seconds"
+display_name = "Sleepless Shift"
+description = "Work forever by increasing the run time by +{value} seconds"
 stat_name = "run_time"
-base_cost = 500
-cost_multiplier = 2.0
-required_upgrades = Array[String](["time_extension_2"])
-required_level = 3
-tree_position = Vector2(0, 2)
-tier = 3
+currency_costs = Dictionary[String, int]({
+"diamond": 5,
+"gold": 9
+})
+value_per_level = 30.0
+required_upgrades = Array[ExtResource("1_dwdfe")]([ExtResource("2_57sys"), ExtResource("3_t0dmu")])

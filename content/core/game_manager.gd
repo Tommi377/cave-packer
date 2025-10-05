@@ -29,10 +29,10 @@ func _ready():
 	time_running = false
 	# Give starting currency for first-time players
 	if currencies["iron"] == 0:
-		currencies["iron"] = 50
-		currencies["copper"] = 20
-		currencies["gold"] = 10
-		currencies["diamond"] = 5
+		currencies["iron"] = 50000
+		currencies["copper"] = 20000
+		currencies["gold"] = 10000
+		currencies["diamond"] = 50000
 		print("GameManager: Set starting currencies")
 
 func _process(delta: float):

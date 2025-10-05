@@ -71,10 +71,10 @@ func purchase_upgrade(upgrade_id: String) -> bool:
 
 ## Check if prerequisites are met
 func _check_prerequisites(upgrade: UpgradeResource) -> bool:
-	for required_id in upgrade.required_upgrades:
-		var req_level = get_upgrade_level(required_id)
+	for required in upgrade.required_upgrades:
+		var req_level = get_upgrade_level(required.id)
 		if req_level == 0:
-			print("Missing prerequisite: ", required_id, " (need level ", upgrade.required_level, ", have ", req_level, ")")
+			print("Missing prerequisite: ", required.id, " (need level ", upgrade.required_level, ", have ", req_level, ")")
 			return false
 	return true
 

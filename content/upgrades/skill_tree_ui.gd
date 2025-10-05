@@ -7,7 +7,6 @@ signal upgrade_selected(upgrade_id: String)
 signal purchase_requested(upgrade_id: String)
 
 @onready var tree_ui: TreeUI = $TreeUI
-@onready var tree_container: Control = $TreeContainer
 @onready var info_panel: PanelContainer = $InfoPanel
 @onready var upgrade_name_label: Label = $InfoPanel/MarginContainer/VBox/UpgradeName
 @onready var upgrade_desc_label: Label = $InfoPanel/MarginContainer/VBox/Description

@@ -23,15 +23,15 @@ enum UpgradeType {
 
 ## Multi-currency costs (new system)
 ## Dictionary of ore_type: amount, e.g., {"iron": 10, "copper": 5}
-@export var currency_costs: Dictionary = {}
-@export var cost_scaling: Dictionary = {} # Per-ore-type multipliers, e.g., {"iron": 1.5, "copper": 2.0}
+@export var currency_costs: Dictionary[String, int] = {}
+@export var cost_scaling: Dictionary[String, int] = {} # Per-ore-type multipliers, e.g., {"iron": 1.5, "copper": 2.0}
 
 ## Stat modification
 @export var value_per_level: float = 10.0
 @export var is_percentage: bool = false
 
 ## Prerequisites
-@export var required_upgrades: Array[String] = []
+@export var required_upgrades: Array[UpgradeResource] = []
 @export var required_level: int = 1
 
 func get_currency_costs(current_level: int) -> Dictionary:

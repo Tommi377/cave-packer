@@ -8,7 +8,7 @@ spacing_top = 2
 spacing_bottom = 2
 
 [node name="UpgradeNode" type="Button"]
-custom_minimum_size = Vector2(100, 100)
+custom_minimum_size = Vector2(80, 80)
 offset_right = 48.0
 offset_bottom = 48.0
 theme_override_fonts/font = SubResource("FontVariation_8apd1")

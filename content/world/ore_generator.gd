@@ -8,7 +8,7 @@ const ORE_TIERS = {
 	"IRON_ORE": {"size_div": 1.0, "base_price": 15, "weight": 50, "atlas_coord": Vector2i(0, 4), "color": Color(0.7, 0.6, 0.5)},
 	"COPPER_ORE": {"size_div": 1.5, "base_price": 25, "weight": 30, "atlas_coord": Vector2i(1, 4), "color": Color(0.8, 0.5, 0.3)},
 	"GOLD_ORE": {"size_div": 2.0, "base_price": 50, "weight": 15, "atlas_coord": Vector2i(2, 4), "color": Color(0.9, 0.8, 0.2)},
-	"DIAMONG_ORE": {"size_div": 3.0, "base_price": 100, "weight": 5, "atlas_coord": Vector2i(3, 4), "color": Color(0.3, 0.8, 0.9)}
+	"DIAMOND_ORE": {"size_div": 3.0, "base_price": 100, "weight": 5, "atlas_coord": Vector2i(3, 4), "color": Color(0.3, 0.8, 0.9)}
 }
 
 ## Generate a random ore type based on weights

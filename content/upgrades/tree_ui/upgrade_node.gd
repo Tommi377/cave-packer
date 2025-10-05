@@ -10,16 +10,27 @@ const CLEARED_STYLEBOX = preload("uid://qgytv8r1l2p6")
 		update_text()
 
 func _ready() -> void:
+	assert(data.currency_costs.keys().all(
+		func(key): return key == 'iron' or key == 'copper' or key == 'gold' or key == 'diamond'
+	))
+	assert(data.cost_scaling.keys().all(
+		func(key): return key == 'iron' or key == 'copper' or key == 'gold' or key == 'diamond'
+	))
 	update_text()
 
 func update_text() -> void:
 	if not Engine.is_editor_hint():
-		text = "%s\n\n%s\n%d/%d" % [
+		text = "%s\n\n%d/%d" % [
 			data.display_name,
-			get_price(),
 			UpgradeManager.get_upgrade_level(data.id),
 			data.max_level
 		]
+		#text = "%s\n\n%s\n%d/%d" % [
+			#data.display_name,
+			#get_price(),
+			#UpgradeManager.get_upgrade_level(data.id),
+			#data.max_level
+		#]
 	else: text = data.display_name
 
 func get_price() -> String:

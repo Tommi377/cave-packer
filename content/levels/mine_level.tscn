@@ -50,14 +50,12 @@ tile_set = ExtResource("2_tk80j")
 script = ExtResource("3_tilemap")
 
 [node name="OreTilemap" type="TileMapLayer" parent="MineTilemap"]
-tile_map_data = PackedByteArray(0, 0, 18, 0, 1, 0, 0, 0, 1, 0, 4, 0, 0, 0, 19, 0, 1, 0, 0, 0, 1, 0, 4, 0, 0, 0, 20, 0, 1, 0, 0, 0, 1, 0, 4, 0, 0, 0, 21, 0, 1, 0, 0, 0, 0, 0, 4, 0, 0, 0)
 tile_set = ExtResource("2_tk80j")
 
 [node name="DamageTilemap" type="TileMapLayer" parent="MineTilemap"]
 tile_set = ExtResource("2_tk80j")
 
 [node name="FogTilemap" type="TileMapLayer" parent="MineTilemap"]
-visible = false
 tile_set = ExtResource("2_tk80j")
 
 [node name="Player" parent="." instance=ExtResource("2_player")]

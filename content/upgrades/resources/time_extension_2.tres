@@ -1,16 +1,18 @@
-[gd_resource type="Resource" script_class="UpgradeResource" load_steps=2 format=3 uid="uid://3im4h83but2b"]
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=4 format=3 uid="uid://3im4h83but2b"]
 
 [ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_hux1w"]
+[ext_resource type="Resource" uid="uid://k2peti13k0lf" path="res://content/upgrades/resources/pickaxe_damage_2.tres" id="2_2jbdu"]
+[ext_resource type="Resource" uid="uid://b2kj3sqr618hv" path="res://content/upgrades/resources/jump_height_1.tres" id="3_rq88s"]
 
 [resource]
 script = ExtResource("1_hux1w")
 id = "time_extension_2"
-display_name = "Extended Time II"
+display_name = "Night Shift"
 description = "Further increase run time by +{value} seconds"
 stat_name = "run_time"
-base_cost = 150
-cost_multiplier = 1.8
-required_upgrades = Array[String](["time_extension_1"])
-required_level = 3
-tree_position = Vector2(0, 1)
-tier = 2
+currency_costs = Dictionary[String, int]({
+"copper": 16,
+"gold": 8
+})
+value_per_level = 15.0
+required_upgrades = Array[ExtResource("1_hux1w")]([ExtResource("2_2jbdu"), ExtResource("3_rq88s")])
