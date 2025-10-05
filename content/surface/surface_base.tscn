@@ -18,23 +18,15 @@ color = Color(0.2, 0.3, 0.4, 1)
 visible = false
 
 [node name="CurrencyLabel" type="Label" parent="UILayer"]
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = -39.0
+offset_top = 24.0
 offset_right = 146.0
-offset_bottom = -16.0
-grow_vertical = 0
+offset_bottom = 47.0
 text = "Credits: 0"
 
 [node name="StartRunButton" type="Button" parent="UILayer"]
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = -56.0
+offset_top = 52.0
 offset_right = 146.0
-offset_bottom = -16.0
-grow_vertical = 0
+offset_bottom = 92.0
 text = "START RUN"

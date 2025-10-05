@@ -1,10 +1,15 @@
-[gd_scene load_steps=9 format=3 uid="uid://c21h7xdvxtl7w"]
+[gd_scene load_steps=14 format=3 uid="uid://c21h7xdvxtl7w"]
 
 [ext_resource type="Script" uid="uid://di12wwpksvflp" path="res://content/player/player.gd" id="1_player"]
+[ext_resource type="Texture2D" uid="uid://cwckx568u6hwr" path="res://cave.png" id="2_y66qv"]
 
-[sub_resource type="CanvasTexture" id="CanvasTexture_3vyb7"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_oq5wi"]
+atlas = ExtResource("2_y66qv")
+region = Rect2(32, 96, 16, 16)
 
-[sub_resource type="CanvasTexture" id="CanvasTexture_2rga7"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_i4jjh"]
+atlas = ExtResource("2_y66qv")
+region = Rect2(48, 96, 16, 16)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
 size = Vector2(12, 12)
@@ -14,26 +19,62 @@ length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Visual/Pickaxe:position")
+tracks/0/path = NodePath("Visual/PickaxeContainer/Pickaxe:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(11.328146, 0.7371212)]
+"values": [Vector2(8, 0)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("Visual/Pickaxe:rotation")
+tracks/1/path = NodePath("Visual/PickaxeContainer/Pickaxe:rotation")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [-0.49702013]
+"values": [0.0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Visual/Player:rotation")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Visual/Player:scale")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Visual/Player:skew")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
 }
 
 [sub_resource type="Animation" id="Animation_y66qv"]
@@ -42,32 +83,160 @@ length = 0.2
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Visual/Pickaxe:position")
+tracks/0/path = NodePath("Visual/PickaxeContainer/Pickaxe:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.099999994, 0.2),
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [Vector2(9.113, 0.737), Vector2(9.243, -2.093), Vector2(9.113, 0.737)]
+"values": [Vector2(8, 0), Vector2(8, 1), Vector2(8, 0)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("Visual/Pickaxe:rotation")
+tracks/1/path = NodePath("Visual/PickaxeContainer/Pickaxe:rotation")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
 "times": PackedFloat32Array(0, 0.099999994, 0.2),
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [-0.4799655442984406, 0.5078908123303503, -0.4799655442984406]
+"values": [0.0, 1.5306537539990268, 0.0]
+}
+
+[sub_resource type="Animation" id="Animation_oq5wi"]
+resource_name = "walk"
+length = 0.55
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visual/Player:rotation")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.15, 0.3, 0.45),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [0.0, -0.17453292519943295, 0.0, 0.17453292519943295]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visual/Player:scale")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.15, 0.3, 0.45),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(0.9, 0.9), Vector2(1, 1), Vector2(0.9, 0.9)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Visual/Player:skew")
+tracks/2/interp = 2
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.15, 0.3, 0.45),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [0.0, -0.08726646259971647, 0.0, 0.08726646259971647]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_oq5wi"]
 _data = {
 &"RESET": SubResource("Animation_2rga7"),
-&"pickaxe_swing": SubResource("Animation_y66qv")
+&"pickaxe_swing": SubResource("Animation_y66qv"),
+&"walk": SubResource("Animation_oq5wi")
+}
+
+[sub_resource type="Animation" id="Animation_i4jjh"]
+resource_name = "move"
+length = 0.55
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visual/Player:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.15, 0.3, 0.45),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [0.0, -0.17453292519943295, 0.0, 0.17453292519943295]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visual/Player:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.15, 0.3, 0.45),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(0.9, 0.9), Vector2(1, 1), Vector2(0.9, 0.9)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Visual/Player:skew")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.15, 0.3, 0.45),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [0.0, -0.08726646259971647, 0.0, 0.08726646259971647]
+}
+
+[sub_resource type="Animation" id="Animation_3ac0f"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visual/Player:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visual/Player:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Visual/Player:skew")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_o23i7"]
+_data = {
+&"RESET": SubResource("Animation_3ac0f"),
+&"move": SubResource("Animation_i4jjh")
 }
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_pickaxe"]
@@ -82,17 +251,15 @@ unique_name_in_owner = true
 z_index = 1
 
 [node name="Player" type="Sprite2D" parent="Visual"]
-modulate = Color(0.4, 0.7, 1, 1)
-texture = SubResource("CanvasTexture_3vyb7")
+texture = SubResource("AtlasTexture_oq5wi")
 region_enabled = true
-region_rect = Rect2(0, 0, 12, 12)
+region_rect = Rect2(0, 0, 16, 16)
 
-[node name="Pickaxe" type="Sprite2D" parent="Visual"]
-modulate = Color(0.31308666, 0.16161871, 1.2032687e-07, 1)
-position = Vector2(11.328146, 0.7371212)
-rotation = -0.49702013
-scale = Vector2(14.422941, 3.593186)
-texture = SubResource("CanvasTexture_2rga7")
+[node name="PickaxeContainer" type="Node2D" parent="Visual"]
+
+[node name="Pickaxe" type="Sprite2D" parent="Visual/PickaxeContainer"]
+position = Vector2(8, 0)
+texture = SubResource("AtlasTexture_i4jjh")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_player")
@@ -100,6 +267,11 @@ shape = SubResource("RectangleShape2D_player")
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
 &"": SubResource("AnimationLibrary_oq5wi")
+}
+
+[node name="WalkAnimation" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_o23i7")
 }
 
 [node name="PickaxeHitbox" type="Area2D" parent="."]

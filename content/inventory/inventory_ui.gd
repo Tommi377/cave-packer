@@ -160,7 +160,7 @@ func _refresh_drop_zone() -> void:
 			drop_zone_items.append(ore_data)
 			_create_drop_zone_item_ui(ore_data)
 	
-	drop_zone_title.text = "DROP ZONE - NEARBY ORES (%d)" % drop_zone_items.size()
+	#drop_zone_title.text = "DROP ZONE - NEARBY ORES (%d)" % drop_zone_items.size()
 
 func _create_drop_zone_item_ui(ore_data: Dictionary) -> void:
 	var item_button = Button.new()
@@ -174,11 +174,21 @@ func _create_drop_zone_item_ui(ore_data: Dictionary) -> void:
 	item_button.add_child(hbox)
 	
 	# Color indicator
-	var color_rect = ColorRect.new()
-	color_rect.custom_minimum_size = Vector2(32, 32)
-	color_rect.color = ore_data.get("color", Color.GRAY)
-	color_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hbox.add_child(color_rect)
+	#var color_rect = ColorRect.new()
+	#color_rect.custom_minimum_size = Vector2(32, 32)
+	#color_rect.color = ore_data.get("color", Color.GRAY)
+	#color_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	#hbox.add_child(color_rect)
+	
+	# texture indicator
+	var texture_rect = TextureRect.new()
+	var atlas_texture = AtlasTexture.new()
+	atlas_texture.atlas = preload("uid://cwckx568u6hwr")
+	atlas_texture.region = Rect2(ore_data.get("atlas_coord", Vector2i(0, 4)) * Vector2i(16, 16), Vector2i(16, 16))
+	texture_rect.texture = atlas_texture
+	texture_rect.expand_mode = TextureRect.EXPAND_FIT_WIDTH
+	texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hbox.add_child(texture_rect)
 	
 	# Info label
 	var label = Label.new()
@@ -522,7 +532,7 @@ func _draw_held_item() -> void:
 	var ore_type = held_item.get("type", "unknown").capitalize()
 	var ore_value = held_item.get("total_value", 0)
 	var info_text = "%s - $%d" % [ore_type, ore_value]
-	var text_pos = mouse_pos + Vector2(0, (shape.size() * cell_size) + 10)
+	var text_pos = mouse_pos - Vector2(0, cell_size / 2.0)
 	held_item_preview.draw_string(ThemeDB.fallback_font, text_pos, info_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
 
 func _place_held_item() -> void:
@@ -641,10 +651,12 @@ func _remove_ore_from_world(ore_data: Dictionary) -> void:
 
 func _spawn_ore_in_world(ore_data: Dictionary) -> void:
 	var ore_scene = preload("res://content/world/ore_item.tscn")
-	var ore_instance = ore_scene.instantiate()
+	var ore_instance = ore_scene.instantiate() as OreItem
 	
 	if player_reference:
 		ore_instance.global_position = player_reference.global_position
+	
+	get_tree().root.add_child(ore_instance)
 	
 	ore_instance.initialize(
 		ore_data.get("type", "IRON_ORE"),
@@ -654,8 +666,6 @@ func _spawn_ore_in_world(ore_data: Dictionary) -> void:
 		ore_data.get("atlas_coord", Vector2i(0, 4)),
 		ore_data.get("color", Color.GRAY)
 	)
-	
-	get_tree().root.add_child(ore_instance)
 	
 	await get_tree().process_frame
 	_refresh_drop_zone()

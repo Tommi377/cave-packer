@@ -22,7 +22,7 @@ class_name Player
 
 @export_group("Pickaxe")
 @export var pickaxe_range: float = 32.0
-@export var pickaxe_cooldown: float = 0.3
+@export var pickaxe_cooldown: float = 1.0
 @export var pickaxe_damage: int = 1 # Damage dealt per pickaxe swing
 
 # State tracking
@@ -34,7 +34,9 @@ var facing_right: bool = true
 
 # Node references
 @onready var visual: CanvasGroup = %Visual
+@onready var pickaxe_container: Node2D = $Visual/PickaxeContainer
 @onready var animation_player: AnimationPlayer = $AnimationPlayer if has_node("AnimationPlayer") else null
+@onready var walk_animation: AnimationPlayer = $WalkAnimation
 
 # Possibly useless?
 @onready var pickaxe_hitbox: Area2D = $PickaxeHitbox if has_node("PickaxeHitbox") else null
@@ -110,6 +112,11 @@ func handle_horizontal_movement(delta: float, input_direction: float) -> void:
 	var current_acceleration := acceleration if is_on_floor() else air_acceleration
 	var current_friction := friction if is_on_floor() else air_friction
 	
+	if velocity.x != 0:
+		walk_animation.play("move")
+	elif walk_animation.is_playing():
+		walk_animation.play("RESET")
+	
 	if input_direction != 0:
 		# Accelerate in the input direction
 		velocity.x = move_toward(velocity.x, input_direction * move_speed, current_acceleration * delta)
@@ -118,22 +125,41 @@ func handle_horizontal_movement(delta: float, input_direction: float) -> void:
 		velocity.x = move_toward(velocity.x, 0.0, current_friction * delta)
 
 func handle_pickaxe() -> void:
-	if Input.is_action_just_pressed("attack") and pickaxe_timer <= 0:
+	if Input.is_action_pressed("move_up"):
+		pickaxe_container.position = Vector2(-8, 0)
+		pickaxe_container.rotation = deg_to_rad(-60)
+		
+	elif Input.is_action_pressed("move_down"):
+		# Mining downward
+		pickaxe_container.position = Vector2(0, -2) # One tile down
+		pickaxe_container.rotation = deg_to_rad(90)
+	else:
+		pickaxe_container.position = Vector2(0, 0)
+		pickaxe_container.rotation = deg_to_rad(0)
+	
+	if (
+		(Input.is_action_pressed("pickup") or Input.is_action_pressed("attack")) and
+		pickaxe_timer <= 0
+	):
 		swing_pickaxe()
 
 func swing_pickaxe() -> void:
 	is_attacking = true
 	pickaxe_timer = pickaxe_cooldown
 	
-	# Play attack animation
+	# Play attack animation with adjusted speed to match cooldown
 	if animation_player and animation_player.has_animation("pickaxe_swing"):
-		animation_player.play("pickaxe_swing")
+		# Play the animation with custom speed (doesn't affect other animations)
+		animation_player.play("pickaxe_swing", -1, 1.0 / pickaxe_cooldown * 0.2 + 0.1)
+		# The third parameter is speed_scale for this specific play() call
+		# Formula: (1.0 / pickaxe_cooldown) * animation_default_length
+		# This makes a 0.2s animation match any cooldown duration
 	
 	# Check for destructible blocks in range
 	detect_and_break_blocks()
 	
-	# Reset attack state after a short delay
-	await get_tree().create_timer(0.2).timeout
+	# Reset attack state after animation completes
+	await get_tree().create_timer(pickaxe_cooldown).timeout
 	is_attacking = false
 
 func detect_and_break_blocks() -> void:

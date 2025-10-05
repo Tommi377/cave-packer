@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://cwckx568u6hwr" path="res://cave.png" id="2_qmotr"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_6rgox"]
+resource_local_to_scene = true
 atlas = ExtResource("2_qmotr")
 region = Rect2(0, 64, 16, 16)
 

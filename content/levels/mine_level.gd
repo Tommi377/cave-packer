@@ -3,13 +3,15 @@ extends Node2D
 @onready var tilemap: TileMapLayer = $MineTilemap
 @onready var player: Player = $Player
 @onready var camera: Camera2D = $Player/Camera2D
-@onready var inventory_ui: InventoryUI = $UILayer/InventoryUI
-@onready var deadline_bar: ProgressBar = $UILayer/DeadlineBar
-@onready var deadline_label: Label = $UILayer/DeadlineLabel
-@onready var earnings_label: Label = $UILayer/EarningsLabel
+@onready var inventory_ui: InventoryUI = %InventoryUI
+@onready var deadline_bar: ProgressBar = %DeadlineBar
+@onready var deadline_label: Label = %DeadlineLabel
+@onready var earnings_label: Label = %EarningsLabel
+@onready var end_day_button: Button = %EndDayButton
 
 @onready var deposit_box_area: Area2D = $DepositBox/Area2D
 @onready var press_e_label: Label = $DepositBox/Label/PressELabel
+@onready var profit_label: Label = $DepositBox/Label/ProfitLabel
 
 var player_near_deposit: bool = false
 
@@ -30,6 +32,9 @@ func _ready() -> void:
 	if deposit_box_area:
 		deposit_box_area.body_entered.connect(_on_deposit_area_entered)
 		deposit_box_area.body_exited.connect(_on_deposit_area_exited)
+	
+	if end_day_button:
+		end_day_button.pressed.connect(GameManager.end_run)
 	
 	# Connect to GameManager updates
 	if GameManager:
@@ -55,7 +60,7 @@ func _input(event: InputEvent) -> void:
 func setup_camera() -> void:
 	if player and camera:
 		camera.enabled = true
-		camera.zoom = Vector2(2.0, 2.0)
+		camera.zoom = Vector2(3.0, 3.0)
 		camera.position_smoothing_enabled = true
 		camera.position_smoothing_speed = 5.0
 
@@ -99,6 +104,12 @@ func _deposit_inventory():
 	if inventory_value == 0:
 		print("No ores to deposit")
 		return
+	
+	profit_label.text = "+$%d" % [inventory_value]
+	profit_label.visible = true
+	var timer := get_tree().create_timer(2)
+	timer.timeout.connect(func(): profit_label.visible = false)
+	
 	
 	# Deposit to GameManager
 	if GameManager:

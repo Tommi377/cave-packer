@@ -8,6 +8,7 @@ signal deadline_changed(current: float, max_value: float)
 signal money_deposited(amount: int)
 
 ## Run state
+var current_day: int = 1
 var run_active: bool = false
 var current_time: float = 30.0 # Base 30 seconds per run
 var max_time: float = 30.0
@@ -44,6 +45,7 @@ func start_run():
 	current_time = max_time
 	run_active = true
 	time_running = true
+	current_day += 1
 	
 	print("Run started! Time limit: ", max_time, " seconds")
 	print("Current money: ", total_money)
