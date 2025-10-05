@@ -3,8 +3,13 @@ extends Node2D
 ## Surface base scene controller - incremental game loop
 
 @onready var upgrade_ui: SkillTreeUI = $UILayer/SkillTreeUI
-@onready var currency_label: Label = $UILayer/CurrencyLabel
 @onready var start_run_button: Button = $UILayer/StartRunButton
+
+@onready var iron_label: Label = $UILayer/VBoxContainer/IronLabel
+@onready var copper_label: Label = $UILayer/VBoxContainer/CopperLabel
+@onready var gold_label: Label = $UILayer/VBoxContainer/GoldLabel
+@onready var diamond_label: Label = $UILayer/VBoxContainer/DiamondLabel
+
 
 func _ready():
 	start_run_button.pressed.connect(_on_start_run_pressed)
@@ -43,12 +48,29 @@ func _on_purchase_requested(upgrade_id: String):
 			
 func _update_currency_display():
 	if GameManager:
-		currency_label.text = "Iron: %d\nCopper: %d\nGold: %d\nDiamond: %d" % [
-			GameManager.get_currency("iron"),
-			GameManager.get_currency("copper"),
-			GameManager.get_currency("gold"),
-			GameManager.get_currency("diamond")
-		]
+		if GameManager.get_currency("iron"):
+			iron_label.text = "%d Iron" % [GameManager.get_currency("iron")]
+			iron_label.visible = true
+		else:
+			iron_label.visible = false
+
+		if GameManager.get_currency("copper"):
+			copper_label.text = "%d Copper" % [GameManager.get_currency("copper")]
+			copper_label.visible = true
+		else:
+			copper_label.visible = false
+
+		if GameManager.get_currency("gold"):
+			gold_label.text = "%d Gold" % [GameManager.get_currency("gold")]
+			gold_label.visible = true
+		else:
+			gold_label.visible = false
+
+		if GameManager.get_currency("diamond"):
+			diamond_label.text = "%d Diamond" % [GameManager.get_currency("diamond")]
+			diamond_label.visible = true
+		else:
+			diamond_label.visible = false
 
 func _on_run_ended():
 	# Refresh currency display and skill tree after run

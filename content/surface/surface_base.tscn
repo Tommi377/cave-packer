@@ -21,18 +21,6 @@ color = Color(0.2, 0.3, 0.4, 1)
 [node name="SkillTreeUI" parent="UILayer" instance=ExtResource("2")]
 visible = false
 
-[node name="CurrencyLabel" type="Label" parent="UILayer"]
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 158.0
-offset_top = -117.0
-offset_right = 288.0
-offset_bottom = -16.0
-grow_vertical = 0
-text = "Credits: 0"
-vertical_alignment = 2
-
 [node name="StartRunButton" type="Button" parent="UILayer"]
 anchors_preset = 2
 anchor_top = 1.0
@@ -45,3 +33,38 @@ grow_vertical = 0
 theme_override_fonts/font = SubResource("FontVariation_d5a5e")
 text = "Start Next
 Day"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UILayer"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 160.0
+offset_top = -96.0
+offset_right = 264.0
+offset_bottom = -16.0
+grow_vertical = 0
+alignment = 2
+
+[node name="IronLabel" type="Label" parent="UILayer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.60784316, 0.67058825, 0.69803923, 1)
+text = "0 Iron"
+vertical_alignment = 2
+
+[node name="CopperLabel" type="Label" parent="UILayer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91764706, 0.30980393, 0.21176471, 1)
+text = "0 Copper"
+vertical_alignment = 2
+
+[node name="GoldLabel" type="Label" parent="UILayer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9764706, 0.7607843, 0.16862746, 1)
+text = "0 Gold"
+vertical_alignment = 2
+
+[node name="DiamondLabel" type="Label" parent="UILayer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3019608, 0.60784316, 0.9019608, 1)
+text = "0 Diamond"
+vertical_alignment = 2
