@@ -34,6 +34,7 @@ var drop_zone_item_nodes: Array[Control] = []
 
 # Inventory grid rendering
 var grid_cells: Array[ColorRect] = []
+var grid_overlay: Control = null  # For drawing contiguous shapes
 
 func _ready() -> void:
 	if inventory_grid:
@@ -78,6 +79,13 @@ func _setup_inventory_grid_ui() -> void:
 			cell.mouse_filter = Control.MOUSE_FILTER_IGNORE # Allow clicks to pass through
 			inventory_container.add_child(cell)
 			grid_cells.append(cell)
+	
+	# Create overlay for drawing contiguous shapes
+	grid_overlay = Control.new()
+	grid_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	grid_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	grid_overlay.draw.connect(_draw_grid_overlay)
+	inventory_container.add_child(grid_overlay)
 
 func _setup_held_item_preview() -> void:
 	held_item_preview.draw.connect(_draw_held_item)
@@ -271,35 +279,155 @@ func _update_inventory_grid_display() -> void:
 	var grid_height = inventory_grid.grid_height
 	var grid_state = inventory_grid.get_grid_state()
 	
-	# Update all cells
+	# Update background cells to default color
 	var cell_idx = 0
 	for y in range(grid_height):
 		for x in range(grid_width):
 			var cell = grid_cells[cell_idx]
-			var cell_color = Color(0.47, 0.328, 0.328, 1.0)
-			
-			# Show ore color if occupied
+			cell.color = Color(0.47, 0.328, 0.328, 1.0)  # Default background
+			cell_idx += 1
+	
+	# Redraw the overlay with contiguous shapes
+	if grid_overlay:
+		grid_overlay.queue_redraw()
+
+func _draw_grid_overlay() -> void:
+	var grid_width = inventory_grid.grid_width
+	var grid_height = inventory_grid.grid_height
+	var grid_state = inventory_grid.get_grid_state()
+	
+	# Group cells by their ore items to draw contiguous shapes
+	var drawn_items = {}
+	
+	for y in range(grid_height):
+		for x in range(grid_width):
 			if grid_state[y][x] != null:
 				var ore_data = grid_state[y][x]
-				cell_color = ore_data.get("color", Color.GRAY)
-			
-			# Show preview
-			if preview_position != Vector2i(-1, -1):
-				var shape = inventory_grid._rotate_shape(
-					held_item.get("shape", [Vector2i(0, 0)]),
-					held_rotation
-				)
-				for shape_offset in shape:
-					var preview_cell = preview_position + shape_offset
-					if preview_cell == Vector2i(x, y):
-						if preview_valid:
-							cell_color = held_item.get("color", Color.GRAY)
-							cell_color.a = 0.6
-						else:
-							cell_color = Color(1.0, 0.2, 0.2, 0.6)
-			
-			cell.color = cell_color
-			cell_idx += 1
+				var item_id = str(ore_data.get("grid_position", Vector2i(x, y)))+str(ore_data.get("size", Vector2i(x, y)))
+				
+				# Only draw each item once
+				if not drawn_items.has(item_id):
+					drawn_items[item_id] = true
+					_draw_ore_shape(ore_data, grid_state)
+	
+	# Draw preview if exists
+	if preview_position != Vector2i(-1, -1) and not held_item.is_empty():
+		var shape = inventory_grid._rotate_shape(
+			held_item.get("shape", [Vector2i(0, 0)]),
+			held_rotation
+		)
+		var preview_color = held_item.get("color", Color.GRAY)
+		if preview_valid:
+			preview_color.a = 0.6
+		else:
+			preview_color = Color(1.0, 0.2, 0.2, 0.6)
+		_draw_shape_at_position(shape, preview_position, preview_color, true)
+
+func _draw_ore_shape(ore_data: Dictionary, grid_state: Array) -> void:
+	var shape = ore_data.get("shape", [Vector2i(0, 0)])
+	var grid_pos = ore_data.get("grid_position", Vector2i(0, 0))
+	var ore_color = ore_data.get("color", Color.GRAY)
+	_draw_shape_at_position(shape, grid_pos, ore_color, false)
+
+func _draw_shape_at_position(shape: Array, grid_pos: Vector2i, color: Color, is_preview: bool) -> void:
+	# Create lookup table for quick neighbor checking
+	var shape_set = {}
+	for shape_offset in shape:
+		shape_set[shape_offset] = true
+	
+	# Draw filled cells
+	for shape_offset in shape:
+		var cell_grid_pos = grid_pos + shape_offset
+		var cell_pos = Vector2(
+			cell_grid_pos.x * (cell_size + cell_padding),
+			cell_grid_pos.y * (cell_size + cell_padding)
+		)
+		var cell_rect = Rect2(cell_pos, Vector2(cell_size, cell_size))
+		grid_overlay.draw_rect(cell_rect, color)
+	
+	# Draw outline only on exterior edges
+	var outline_color = Color.WHITE if not is_preview else Color(1.0, 1.0, 1.0, 0.8)
+	var outline_width = 2.0
+	
+	for shape_offset in shape:
+		var cell_grid_pos = grid_pos + shape_offset
+		var cell_pos = Vector2(
+			cell_grid_pos.x * (cell_size + cell_padding),
+			cell_grid_pos.y * (cell_size + cell_padding)
+		)
+		
+		# Check each side of the cell
+		var neighbors = [
+			Vector2i(shape_offset.x, shape_offset.y - 1),  # Top
+			Vector2i(shape_offset.x + 1, shape_offset.y),  # Right
+			Vector2i(shape_offset.x, shape_offset.y + 1),  # Bottom
+			Vector2i(shape_offset.x - 1, shape_offset.y)   # Left
+		]
+		
+		# Draw line segments only on edges without neighbors
+		# Top edge
+		if not shape_set.has(neighbors[0]):
+			grid_overlay.draw_line(
+				cell_pos,
+				cell_pos + Vector2(cell_size, 0),
+				outline_color,
+				outline_width
+			)
+		else:
+			grid_overlay.draw_line(
+				cell_pos,
+				cell_pos + Vector2(cell_size, 0),
+				color,
+				outline_width
+			)
+		
+		# Right edge
+		if not shape_set.has(neighbors[1]):
+			grid_overlay.draw_line(
+				cell_pos + Vector2(cell_size, 0),
+				cell_pos + Vector2(cell_size, cell_size),
+				outline_color,
+				outline_width
+			)
+		else:
+			grid_overlay.draw_line(
+				cell_pos + Vector2(cell_size, 0),
+				cell_pos + Vector2(cell_size, cell_size),
+				color,
+				outline_width
+			)
+		
+		# Bottom edge
+		if not shape_set.has(neighbors[2]):
+			grid_overlay.draw_line(
+				cell_pos + Vector2(0, cell_size),
+				cell_pos + Vector2(cell_size, cell_size),
+				outline_color,
+				outline_width
+			)
+		else:
+			grid_overlay.draw_line(
+				cell_pos + Vector2(0, cell_size),
+				cell_pos + Vector2(cell_size, cell_size),
+				color,
+				outline_width
+			)
+		
+		# Left edge
+		if not shape_set.has(neighbors[3]):
+			grid_overlay.draw_line(
+				cell_pos,
+				cell_pos + Vector2(0, cell_size),
+				outline_color,
+				outline_width
+			)
+		else:
+			grid_overlay.draw_line(
+				cell_pos,
+				cell_pos + Vector2(0, cell_size),
+				color,
+				outline_width
+			)
 
 func _draw_held_item() -> void:
 	if held_item.is_empty():
@@ -317,24 +445,78 @@ func _draw_held_item() -> void:
 	
 	# Apply grab offset so the item is centered on the cell that was clicked
 	var offset_pixels = Vector2(
-		- held_item_grab_offset.x * (cell_size + cell_padding),
-		- held_item_grab_offset.y * (cell_size + cell_padding)
+		- held_item_grab_offset.x * cell_size,
+		- held_item_grab_offset.y * cell_size
 	)
 	
-	var shape_table = {}
+	# Create lookup table for quick neighbor checking
+	var shape_set = {}
 	for shape_offset in shape:
-		shape_table[shape_offset] = true
+		shape_set[shape_offset] = true
 	
-	# Draw centered on cursor with offset
+	# Draw filled cells (no padding, touching each other)
 	for shape_offset in shape:
 		var cell_pos = mouse_pos + offset_pixels + Vector2(
-			shape_offset.x * (cell_size + cell_padding),
-			shape_offset.y * (cell_size + cell_padding)
+			shape_offset.x * cell_size,
+			shape_offset.y * cell_size
 		)
 		var cell_rect = Rect2(cell_pos, Vector2(cell_size, cell_size))
 		held_item_preview.draw_rect(cell_rect, ore_color)
-		held_item_preview.draw_rect(cell_rect, Color.WHITE, false, 2.0)
-
+	
+	# Draw outline only on edges (not between touching cells)
+	var outline_color = Color.WHITE
+	var outline_width = 2.0
+	
+	for shape_offset in shape:
+		var cell_pos = mouse_pos + offset_pixels + Vector2(
+			shape_offset.x * cell_size,
+			shape_offset.y * cell_size
+		)
+		
+		# Check each side of the cell
+		var neighbors = [
+			Vector2i(shape_offset.x, shape_offset.y - 1), # Top
+			Vector2i(shape_offset.x + 1, shape_offset.y), # Right
+			Vector2i(shape_offset.x, shape_offset.y + 1), # Bottom
+			Vector2i(shape_offset.x - 1, shape_offset.y) # Left
+		]
+		
+		# Draw line segments only on edges without neighbors
+		# Top edge
+		if not shape_set.has(neighbors[0]):
+			held_item_preview.draw_line(
+				cell_pos,
+				cell_pos + Vector2(cell_size, 0),
+				outline_color,
+				outline_width
+			)
+		
+		# Right edge
+		if not shape_set.has(neighbors[1]):
+			held_item_preview.draw_line(
+				cell_pos + Vector2(cell_size, 0),
+				cell_pos + Vector2(cell_size, cell_size),
+				outline_color,
+				outline_width
+			)
+		
+		# Bottom edge
+		if not shape_set.has(neighbors[2]):
+			held_item_preview.draw_line(
+				cell_pos + Vector2(0, cell_size),
+				cell_pos + Vector2(cell_size, cell_size),
+				outline_color,
+				outline_width
+			)
+		
+		# Left edge
+		if not shape_set.has(neighbors[3]):
+			held_item_preview.draw_line(
+				cell_pos,
+				cell_pos + Vector2(0, cell_size),
+				outline_color,
+				outline_width
+			)
 	
 	# Draw info text below the item
 	var ore_type = held_item.get("type", "unknown").capitalize()
