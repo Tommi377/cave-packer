@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=2 format=3 uid="uid://d3ik50s342sjl"]
+
+[ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_4jf1y"]
+
+[resource]
+script = ExtResource("1_4jf1y")
+id = "ore_freq_1"
+display_name = "Ore Prosperity"
+description = "Chance for an ore to spawn increased"
+stat_name = "ore_freq"
+max_level = 1
+value_per_level = 1.0

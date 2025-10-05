@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=2 format=3 uid="uid://dy5qhuj26pjob"]
+
+[ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_yra76"]
+
+[resource]
+script = ExtResource("1_yra76")
+id = "jump_amount_1"
+display_name = "Double Jump"
+description = "Defy gravity by jumping twice"
+stat_name = "jump_amount"
+max_level = 1
+value_per_level = 1.0

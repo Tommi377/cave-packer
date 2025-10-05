@@ -1,7 +1,11 @@
-[gd_scene load_steps=3 format=3 uid="uid://doqajjgf2v8t1"]
+[gd_scene load_steps=4 format=3 uid="uid://doqajjgf2v8t1"]
 
 [ext_resource type="Script" uid="uid://b1kpew5kki4bq" path="res://content/surface/surface_base.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://c7t48pbemsa0u" path="res://content/upgrades/skill_tree_ui.tscn" id="2"]
+
+[sub_resource type="FontVariation" id="FontVariation_d5a5e"]
+spacing_top = 2
+spacing_bottom = 2
 
 [node name="SurfaceBase" type="Node2D"]
 script = ExtResource("1")
@@ -33,5 +37,7 @@ horizontal_alignment = 2
 offset_left = 16.0
 offset_top = 16.0
 offset_right = 146.0
-offset_bottom = 56.0
-text = "START RUN"
+offset_bottom = 76.0
+theme_override_fonts/font = SubResource("FontVariation_d5a5e")
+text = "Start Next
+Day"

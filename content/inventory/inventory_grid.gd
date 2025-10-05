@@ -19,6 +19,8 @@ var held_item: Dictionary = {}
 var held_item_rotation: int = 0 # 0, 1, 2, 3 for 0°, 90°, 180°, 270°
 
 func _ready() -> void:
+	grid_width = UpgradeManager.get_backpack_size()
+	grid_height = UpgradeManager.get_backpack_size()
 	_initialize_grid()
 
 ## Initialize empty grid
@@ -155,7 +157,7 @@ func get_total_value() -> int:
 			var ore_data = grid[y][x]
 			if ore_data != null:
 				# Use grid_position as unique identifier to avoid counting same item multiple times
-				var item_id = str(ore_data.get("grid_position", Vector2i(x, y)))
+				var item_id = str(ore_data.get("grid_position", Vector2i(x, y)))+str(ore_data.get("size", Vector2i(x, y)))
 				if not counted_items.has(item_id):
 					counted_items[item_id] = true
 					total += ore_data.get("total_value", 0) # Use total_value from ore

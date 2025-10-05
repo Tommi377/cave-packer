@@ -8,7 +8,7 @@ signal deadline_changed(current: float, max_value: float)
 signal currency_deposited(ore_type: String, amount: int)
 
 ## Run state
-var current_day: int = 1
+var current_day: int = 0
 var run_active: bool = false
 var current_time: float = 30.0 # Base 30 seconds per run
 var max_time: float = 30.0
@@ -48,7 +48,7 @@ func start_run():
 	# Get max time from upgrades
 	max_time = 30.0 # Base 30 seconds
 	if UpgradeManager:
-		max_time += UpgradeManager.get_stat_value("run_time")
+		max_time = UpgradeManager.get_run_time()
 	
 	current_time = max_time
 	run_active = true

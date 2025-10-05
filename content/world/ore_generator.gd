@@ -5,32 +5,10 @@ class_name OreGenerator
 
 # Ore tier definitions (only valuable ores, stone drops nothing)
 const ORE_TIERS = {
-	"IRON_ORE": {"base_price": 15, "weight": 50, "atlas_coord": Vector2i(0, 4), "color": Color(0.7, 0.6, 0.5)},
-	"COPPER_ORE": {"base_price": 25, "weight": 30, "atlas_coord": Vector2i(1, 4), "color": Color(0.8, 0.5, 0.3)},
-	"GOLD_ORE": {"base_price": 50, "weight": 15, "atlas_coord": Vector2i(2, 4), "color": Color(0.9, 0.8, 0.2)},
-	"DIAMONG_ORE": {"base_price": 100, "weight": 5, "atlas_coord": Vector2i(3, 4), "color": Color(0.3, 0.8, 0.9)}
-}
-
-const SIZE_WEIGHTS_0 = {
-	1: 5,
-	2: 4,
-	3: 1
-}
-
-const SIZE_WEIGHTS = {
-	0: SIZE_WEIGHTS_0
-}
-
-# Size distribution (1-8 cells, middle sizes more common)
-const SIZE_WEIGHTS_TEST = {
-	1: 5,
-	2: 15,
-	3: 25,
-	4: 25,
-	5: 15,
-	6: 8,
-	7: 5,
-	8: 2
+	"IRON_ORE": {"size_div": 1.0, "base_price": 15, "weight": 50, "atlas_coord": Vector2i(0, 4), "color": Color(0.7, 0.6, 0.5)},
+	"COPPER_ORE": {"size_div": 1.5, "base_price": 25, "weight": 30, "atlas_coord": Vector2i(1, 4), "color": Color(0.8, 0.5, 0.3)},
+	"GOLD_ORE": {"size_div": 2.0, "base_price": 50, "weight": 15, "atlas_coord": Vector2i(2, 4), "color": Color(0.9, 0.8, 0.2)},
+	"DIAMONG_ORE": {"size_div": 3.0, "base_price": 100, "weight": 5, "atlas_coord": Vector2i(3, 4), "color": Color(0.3, 0.8, 0.9)}
 }
 
 ## Generate a random ore type based on weights
@@ -49,23 +27,43 @@ static func generate_ore_type() -> String:
 	
 	return "IRON_ORE" # Fallback
 
-static func get_size_weights() -> Dictionary:
-	return SIZE_WEIGHTS[UpgradeManager.get_ore_size()]
+static func _factorial(x: int) -> int:
+	var result := 1
+	for i in range(2, x + 1):
+		result *= i
+	return result
 
-## Generate a random ore size based on weights (1-8)
-static func generate_ore_size() -> int:
-	var total_weight = 0
-	var weights := get_size_weights()
-	for size in weights:
-		total_weight += weights[size]
+static func _binomial_coefficient(n: int, k: int) -> float:
+	return float(_factorial(n)) / (float(_factorial(k)) * float(_factorial(n - k)))
+
+static func get_size_weights() -> Array:
+	var probabilities := []
+	var choices := int(UpgradeManager.get_stat_value("ore_size")) + 3 # Keep this under 20 or int overflow
+	var n := choices - 1  # number of trials
 	
-	var roll = randf() * total_weight
+	# Compute the binomial coefficients
+	var total := 0.0
+	for k in range(choices):
+		var coeff := _binomial_coefficient(n, k)
+		probabilities.append(coeff)
+		total += coeff
+	
+	# Normalize to make the sum = 1 (so it behaves like a probability distribution)
+	for i in range(probabilities.size()):
+		probabilities[i] /= total
+	
+	return probabilities
+
+static func generate_ore_size(ore_type: String) -> int:
+	var weights := get_size_weights()
+	
+	var roll = randf()
 	var current = 0.0
 	
-	for size in weights:
+	for size in range(len(weights)):
 		current += weights[size]
 		if roll <= current:
-			return size
+			return ceili((size + 1) / ORE_TIERS[ore_type].get("size_div", 1.0))
 	
 	return 3 # Fallback
 
@@ -118,7 +116,7 @@ static func generate_ore_data(ore_type: String = "") -> Dictionary:
 	if ore_type.is_empty():
 		ore_type = generate_ore_type()
 	
-	var ore_size = generate_ore_size()
+	var ore_size = generate_ore_size(ore_type)
 	var shape = generate_connected_shape(ore_size)
 	var tier_data = get_ore_data(ore_type)
 	

@@ -6,9 +6,7 @@
 script = ExtResource("1_l46gg")
 id = "swing_speed_1"
 display_name = "Faster Swing"
-description = "Reduce swing cooldown by {value}%"
+description = "Reduce swing cooldown by -5%"
 stat_name = "pickaxe_speed"
 max_level = 4
-cost_multiplier = 1.6
-value_per_level = 0.2
-tree_position = Vector2(5, 0)
+value_per_level = 0.05

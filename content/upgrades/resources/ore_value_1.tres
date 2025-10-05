@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=2 format=3 uid="uid://dvehgmkqxq8sf"]
+
+[ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_44e4v"]
+
+[resource]
+script = ExtResource("1_44e4v")
+id = "ore_value_1"
+display_name = "Efficient Smelting"
+description = "Gain double the amount of materials from ores"
+stat_name = "ore_value"
+max_level = 1
+value_per_level = 1.0

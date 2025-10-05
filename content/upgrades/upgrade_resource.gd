@@ -34,10 +34,6 @@ enum UpgradeType {
 @export var required_upgrades: Array[String] = []
 @export var required_level: int = 1
 
-## Visual/UI
-@export var tree_position: Vector2 = Vector2.ZERO
-@export var tier: int = 1
-
 func get_currency_costs(current_level: int) -> Dictionary:
 	# New multi-currency cost function
 	if current_level >= max_level:

@@ -2,6 +2,8 @@
 class_name UpgradeNode
 extends Button
 
+const CLEARED_STYLEBOX = preload("uid://qgytv8r1l2p6")
+
 @export var data: UpgradeResource :
 	set(value):
 		data = value
@@ -32,3 +34,8 @@ func get_price() -> String:
 func update_style() -> void:
 	disabled = not UpgradeManager.can_purchase(data.id)
 	visible = UpgradeManager._check_prerequisites(data)
+	
+	var current_level = UpgradeManager.get_upgrade_level(data.id)
+	# Check max level
+	if current_level >= data.max_level:
+		add_theme_stylebox_override("disabled", CLEARED_STYLEBOX)

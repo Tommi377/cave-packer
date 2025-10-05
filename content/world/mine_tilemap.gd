@@ -1,6 +1,9 @@
 extends TileMapLayer
 class_name MineTilemap
 
+@export var width: int = 40
+@export var depth: int = 60
+
 @onready var ore_tilemap: TileMapLayer = $OreTilemap
 @onready var fog_tilemap: TileMapLayer = $FogTilemap
 @onready var damage_tilemap: TileMapLayer = $DamageTilemap
@@ -17,13 +20,6 @@ const ORE_ATLAS = {
 const SURFACE_DEPTH = 0
 const MID_DEPTH = 20
 const DEEP_DEPTH = 40
-
-## Ore spawn chances by depth
-const ORE_SPAWN_CHANCE = {
-	"surface": {"STONE": 0.95, "IRON_ORE": 0.04, "COPPER_ORE": 0.01},
-	"mid": {"STONE": 0.90, "IRON_ORE": 0.04, "COPPER_ORE": 0.04, "GOLD_ORE": 0.02},
-	"deep": {"STONE": 0.78, "IRON_ORE": 0.05, "COPPER_ORE": 0.10, "GOLD_ORE": 0.05, "DIAMOND_ORE": 0.02}
-}
 
 ## Ore drop scene
 const ORE_ITEM_SCENE = preload("res://content/world/ore_item.tscn")
@@ -42,7 +38,7 @@ func _ready() -> void:
 		generate_mine()
 
 ## Generate the mine shaft
-func generate_mine(width: int = 40, depth: int = 60) -> void:
+func generate_mine() -> void:
 	# Clear existing tiles
 	clear()
 	
@@ -60,6 +56,15 @@ func generate_mine(width: int = 40, depth: int = 60) -> void:
 				fog_tilemap.set_cell(tile_pos, 0, Vector2i(0, 5))
 	
 	#set_cells_terrain_connect(get_used_cells(), 0, 0)
+	for y in range(-20, depth):
+		set_cell(Vector2i(-1, y), 0, Vector2i(9, 5))
+		set_cell(Vector2i(width, y), 0, Vector2i(11, 5))
+		pass
+	
+	
+	for x in range(-1, width + 1):
+		set_cell(Vector2i(x, depth), 0, Vector2i(10, 6))
+		set_cell(Vector2i(x, -20), 0, Vector2i(10, 4))
 	
 	print("Mine generated: ", width, "x", depth, " tiles")
 
@@ -69,7 +74,8 @@ func _get_tile_for_depth(depth_y: int) -> String:
 		return "STONE"
 	
 	var zone = _get_depth_zone(depth_y)
-	var chances = ORE_SPAWN_CHANCE[zone]
+	var ore_spawn_level = UpgradeManager.get_stat_value('ore_freq')
+	var chances = ORE_SPAWN_CHANCE[ore_spawn_level][zone]
 	
 	# Random weighted selection
 	var roll = randf()
@@ -99,7 +105,7 @@ func damage_tile_at_position(world_pos: Vector2, damage: int = 1) -> bool:
 ## Damage a tile at tile coordinates
 func damage_tile(tile_pos: Vector2i, damage: int = 1) -> bool:
 	var tile_data = get_cell_tile_data(tile_pos)
-	if tile_data == null:
+	if tile_data == null or tile_data.terrain != 0:
 		return false # No tile here
 	
 	# Calculate max HP based on depth
@@ -233,3 +239,79 @@ func _atlas_to_ore_type(atlas_coords: Vector2i) -> String:
 	if not type:
 		return "STONE"
 	return type
+
+const ORE_SPAWN_CHANCE = [
+	ORE_SPAWN_CHANCE_1,
+	ORE_SPAWN_CHANCE_2,
+	ORE_SPAWN_CHANCE_3
+]
+
+## Ore spawn chances by depth
+const ORE_SPAWN_CHANCE_1 = {
+	"surface": {
+		"STONE": 0.95,
+		"IRON_ORE": 0.04,
+		"COPPER_ORE": 0.01
+	},
+	"mid": {
+		"STONE": 0.90,
+		"IRON_ORE": 0.04,
+		"COPPER_ORE": 0.04,
+		"GOLD_ORE": 0.02
+	},
+	"deep": {
+		"STONE": 0.78,
+		"IRON_ORE": 0.05,
+		"COPPER_ORE": 0.10,
+		"GOLD_ORE": 0.05,
+		"DIAMOND_ORE": 0.02
+	}
+}
+
+## Ore spawn chances by depth
+const ORE_SPAWN_CHANCE_2 = {
+	"surface": {
+		"STONE": 0.92,
+		"IRON_ORE": 0.04,
+		"COPPER_ORE": 0.03,
+		"GOLD_ORE": 0.01,
+	},
+	"mid": {
+		"STONE": 0.85,
+		"IRON_ORE": 0.05,
+		"COPPER_ORE": 0.06,
+		"GOLD_ORE": 0.03,
+		"DIAMOND_ORE": 0.01
+	},
+	"deep": {
+		"STONE": 0.67,
+		"IRON_ORE": 0.07,
+		"COPPER_ORE": 0.15,
+		"GOLD_ORE": 0.07,
+		"DIAMOND_ORE": 0.04
+	}
+}
+
+## Ore spawn chances by depth
+const ORE_SPAWN_CHANCE_3 = {
+	"surface": {
+		"STONE": 0.90,
+		"IRON_ORE": 0.06,
+		"COPPER_ORE": 0.03,
+		"GOLD_ORE": 0.01,
+	},
+	"mid": {
+		"STONE": 0.80,
+		"IRON_ORE": 0.07,
+		"COPPER_ORE": 0.08,
+		"GOLD_ORE": 0.04,
+		"DIAMOND_ORE": 0.01
+	},
+	"deep": {
+		"STONE": 0.56,
+		"IRON_ORE": 0.10,
+		"COPPER_ORE": 0.20,
+		"GOLD_ORE": 0.10,
+		"DIAMOND_ORE": 0.04
+	}
+}

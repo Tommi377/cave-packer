@@ -5,11 +5,8 @@
 [resource]
 script = ExtResource("1_qciyw")
 id = "pickaxe_damage_1"
-display_name = "Sharper Pickaxe"
+display_name = "Iron Pickaxe"
 description = "Increase mining damage by +{value}"
 stat_name = "pickaxe_power"
-max_level = 5
-base_cost = 75
-cost_multiplier = 1.7
+max_level = 4
 value_per_level = 1.0
-tree_position = Vector2(2, 0)

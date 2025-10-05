@@ -24,7 +24,7 @@ class_name Player
 @export_group("Pickaxe")
 @export var pickaxe_range: float = 16.0
 @export var pickaxe_cooldown: float = 1.0
-@export var pickaxe_damage: int = 1 # Damage dealt per pickaxe swing
+@export var pickaxe_damage: float = 1.0 # Damage dealt per pickaxe swing
 
 # State tracking
 var coyote_timer: float = 0.0
@@ -64,7 +64,10 @@ func apply_upgrades() -> void:
 	# Level 0 = 0 air jumps (no double jump)
 	# Level 1 = 1 air jump (double jump)
 	# Level 2 = 2 air jumps (triple jump), etc.
-	max_air_jumps = UpgradeManager.get_upgrade_level("double_jump")
+	max_air_jumps = UpgradeManager.get_stat_value("jump_amount")
+	
+	pickaxe_cooldown = UpgradeManager.get_pickaxe_speed_multiplier()
+	pickaxe_damage = UpgradeManager.get_pickaxe_damage()
 	
 	# Apply movement speed multiplier
 	var speed_multiplier = UpgradeManager.get_move_speed_multiplier()
@@ -72,7 +75,8 @@ func apply_upgrades() -> void:
 	
 	# Apply jump height multiplier
 	var jump_multiplier = UpgradeManager.get_jump_height_multiplier()
-	jump_velocity *= jump_multiplier
+	var block_jump_vel = -125.0
+	jump_velocity = block_jump_vel * jump_multiplier
 
 func _physics_process(delta: float) -> void:
 	update_timers(delta)

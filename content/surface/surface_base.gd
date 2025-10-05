@@ -8,7 +8,6 @@ extends Node2D
 
 func _ready():
 	start_run_button.pressed.connect(_on_start_run_pressed)
-	start_run_button.text = "Start Next Run"
 	
 	upgrade_ui.purchase_requested.connect(_on_purchase_requested)
 	

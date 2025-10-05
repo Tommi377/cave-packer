@@ -1,6 +1,6 @@
 extends Node2D
 
-@onready var tilemap: TileMapLayer = $MineTilemap
+@onready var tilemap: MineTilemap = $MineTilemap
 @onready var player: Player = $Player
 @onready var camera: Camera2D = $Player/Camera2D
 @onready var inventory_ui: InventoryUI = %InventoryUI
@@ -8,6 +8,7 @@ extends Node2D
 @onready var deadline_label: Label = %DeadlineLabel
 @onready var earnings_label: Label = %EarningsLabel
 @onready var end_day_button: Button = %EndDayButton
+@onready var day_label: Label = %DayLabel
 
 @onready var deposit_box_area: Area2D = $DepositBox/Area2D
 @onready var press_e_label: Label = $DepositBox/Label/PressELabel
@@ -63,6 +64,10 @@ func setup_camera() -> void:
 		camera.zoom = Vector2(3.0, 3.0)
 		camera.position_smoothing_enabled = true
 		camera.position_smoothing_speed = 5.0
+		camera.limit_left = -16
+		camera.limit_right = (tilemap.width + 1) * 16
+		camera.limit_top = -21 * 16
+		camera.limit_bottom = (tilemap.depth + 1) * 16
 
 func toggle_inventory() -> void:
 	# Deprecated - inventory UI handles this now
@@ -103,18 +108,20 @@ func _deposit_inventory():
 	var grid = inventory_ui.inventory_grid.get_grid_state()
 	var counted_items = {}
 	
+	var coef := UpgradeManager.get_stat_value("ore_value") + 1
+	
 	# Count ores by type
 	for y in range(grid.size()):
 		for x in range(grid[y].size()):
 			var ore_data = grid[y][x]
 			if ore_data != null:
 				# Use grid_position as unique identifier
-				var item_id = str(ore_data.get("grid_position", Vector2i(x, y)))
+				var item_id = str(ore_data.get("grid_position", Vector2i(x, y)))+str(ore_data.get("size", Vector2i(x, y)))
 				if not counted_items.has(item_id):
 					counted_items[item_id] = true
 					var ore_type = ore_data.get("type", "iron")
 					var ore_size = ore_data.get("size", 1)
-					ore_counts[ore_type] = ore_counts.get(ore_type, 0) + ore_size
+					ore_counts[ore_type] = ore_counts.get(ore_type, 0) + ore_size * coef
 	
 	if ore_counts.is_empty():
 		print("No ores to deposit")
@@ -155,6 +162,7 @@ func _on_currency_deposited(_ore_type: String, _amount: int):
 func _on_run_started():
 	_update_deadline_display(GameManager.current_time, GameManager.max_time)
 	_update_earnings_display()
+	day_label.text = "Day %d" % [GameManager.current_day]
 
 func _on_run_ended():
 	print("Run completed!")

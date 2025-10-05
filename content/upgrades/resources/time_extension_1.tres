@@ -8,7 +8,7 @@ id = "time_extension_1"
 display_name = "Extended Time I"
 description = "Increase run time by +{value} seconds"
 stat_name = "run_time"
-base_cost = 50
+max_level = 6
 currency_costs = {
 "copper": 5,
 "iron": 10

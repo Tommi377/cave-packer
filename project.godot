@@ -17,8 +17,8 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-GameManager="*res://content/core/game_manager.tscn"
 UpgradeManager="*res://content/upgrades/upgrade_manager.tscn"
+GameManager="*res://content/core/game_manager.tscn"
 
 [display]
 

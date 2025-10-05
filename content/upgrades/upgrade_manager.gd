@@ -6,7 +6,7 @@ signal upgrade_purchased(upgrade_id: String, new_level: int)
 signal purchase_state_changed()
 
 ## Load the upgrades collection resource
-@export var upgrades_collection: UpgradesCollection
+@export var upgrades_collection: UpgradesCollection = preload("uid://duc1rbggwiy3u")
 
 ## Track purchased upgrade levels
 var upgrade_levels: Dictionary = {}
@@ -24,7 +24,6 @@ func _ready():
 	for upgrade in upgrades_collection.upgrades:
 		upgrade_levels[upgrade.id] = 0
 	
-	_recalculate_stats()
 	print("UpgradeManager initialized with ", upgrades_collection.upgrades.size(), " upgrades")
 
 ## Purchase an upgrade
@@ -147,12 +146,6 @@ func get_all_upgrades() -> Array[UpgradeResource]:
 		return upgrades_collection.upgrades
 	return []
 
-## Get upgrades by tier
-func get_upgrades_by_tier(tier: int) -> Array[UpgradeResource]:
-	if upgrades_collection:
-		return upgrades_collection.get_upgrades_by_tier(tier)
-	return []
-
 ## Get upgrade resource by ID
 func get_upgrade(upgrade_id: String) -> UpgradeResource:
 	if upgrades_collection:
@@ -168,7 +161,7 @@ func get_upgrade_currency_costs(upgrade_id: String) -> Dictionary:
 
 ## Backward compatibility functions
 func get_backpack_size() -> int:
-	return 5 + int(get_stat_value("grid_size"))
+	return 2 + int(get_stat_value("grid_size"))
 	
 func get_ore_size() -> int:
 	return int(get_stat_value("ore_size"))
@@ -177,13 +170,16 @@ func get_run_time() -> float:
 	return 30.0 + get_stat_value("run_time")
 
 func get_pickaxe_speed_multiplier() -> float:
-	return 1.0 + get_stat_value("pickaxe_speed")
+	return 1.0 - get_stat_value("pickaxe_speed")
+
+func get_pickaxe_damage() -> float:
+	return 1.0 + get_stat_value("pickaxe_power")
 
 func get_move_speed_multiplier() -> float:
 	return 1.0 + get_stat_value("move_speed")
 
 func get_jump_height_multiplier() -> float:
-	return 1.0 + get_stat_value("jump_height")
+	return 2.0 + get_stat_value("jump_height") / 2
 
 ## Save/Load system
 func get_save_data() -> Dictionary:

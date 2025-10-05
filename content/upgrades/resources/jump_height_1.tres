@@ -6,9 +6,7 @@
 script = ExtResource("1_gq5u4")
 id = "jump_height_1"
 display_name = "Higher Jump"
-description = "Jump +{value} units higher"
+description = "Jump +{value} blocks higher"
 stat_name = "jump_height"
-base_cost = 150
-cost_multiplier = 1.8
-value_per_level = 0.2
-tree_position = Vector2(4, 0)
+max_level = 2
+value_per_level = 0.5

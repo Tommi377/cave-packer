@@ -10,10 +10,6 @@ description = "Make your inventory bigger"
 stat_name = "grid_size"
 max_level = 1
 currency_costs = {
-"iron": 5
-}
-cost_scaling = {
-"iron": 1.0
+"iron": 4
 }
 value_per_level = 1.0
-tree_position = Vector2(1, 0)
