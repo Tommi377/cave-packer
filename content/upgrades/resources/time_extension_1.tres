@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=2 format=3 uid="uid://boxamarik0laa"]
+
+[ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_1pvu0"]
+
+[resource]
+script = ExtResource("1_1pvu0")
+id = "time_extension_1"
+display_name = "Extended Time I"
+description = "Increase run time by +{value} seconds"
+stat_name = "run_time"
+base_cost = 50

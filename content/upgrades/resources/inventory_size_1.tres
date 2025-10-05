@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=2 format=3 uid="uid://dhyifha0ixy2w"]
+
+[ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_u0pjb"]
+
+[resource]
+script = ExtResource("1_u0pjb")
+id = "inventory_size_1"
+display_name = "Bigger Backpack"
+description = "Carry +{value} more ore items"
+stat_name = "grid_size"
+max_level = 5
+cost_multiplier = 1.6
+value_per_level = 1.0
+tree_position = Vector2(1, 0)

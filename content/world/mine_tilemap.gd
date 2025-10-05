@@ -3,6 +3,7 @@ class_name MineTilemap
 
 @onready var ore_tilemap: TileMapLayer = $OreTilemap
 @onready var fog_tilemap: TileMapLayer = $FogTilemap
+@onready var damage_tilemap: TileMapLayer = $DamageTilemap
 
 ## Tile types (atlas coordinates)
 const ORE_ATLAS = {
@@ -102,13 +103,17 @@ func damage_tile(tile_pos: Vector2i, damage: int = 1) -> bool:
 		return false # No tile here
 	
 	# Calculate max HP based on depth
-	var max_hp = tile_pos.y if tile_pos.y > 0 else 1
+	@warning_ignore("integer_division")
+	var max_hp := tile_pos.y if (tile_pos.y - 1) > 0 else 1
 	
 	# Get current HP (lazy initialization - if not damaged yet, assume full HP)
 	var current_hp = block_hp.get(tile_pos, max_hp)
 	
 	# Apply damage
 	current_hp -= damage
+	
+	var damage_atlas_index := int(float(current_hp) / max_hp * 5)
+	damage_tilemap.set_cell(tile_pos, 0, Vector2i(5 - damage_atlas_index, 5))
 	
 	print("Block at ", tile_pos, " took ", damage, " damage. HP: ", current_hp, "/", max_hp)
 	
@@ -145,6 +150,7 @@ func break_tile(tile_pos: Vector2i) -> bool:
 	
 	set_cells_terrain_connect([tile_pos], 0, -1, false)
 	ore_tilemap.erase_cell(tile_pos)
+	damage_tilemap.erase_cell(tile_pos)
 	
 	# Only spawn ore drops for actual ore blocks (not stone)
 	if ore_type != "STONE":

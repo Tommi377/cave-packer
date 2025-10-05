@@ -1,179 +1,181 @@
 extends Node
-# class_name UpgradeManager
 
-## Manages all upgrades, progression, and skill tree state
+## Manages all upgrade purchases and stat bonuses using resource-based upgrades
 
 signal upgrade_purchased(upgrade_id: String, new_level: int)
-signal stats_changed()
+signal purchase_state_changed()
 
-## All available upgrades (upgrade_id -> UpgradeData)
-var upgrades: Dictionary = {}
+## Load the upgrades collection resource
+@export var upgrades_collection: UpgradesCollection
 
-## Current upgrade levels (upgrade_id -> level)
+## Track purchased upgrade levels
 var upgrade_levels: Dictionary = {}
 
-func _ready() -> void:
-	_initialize_upgrades()
+## Cached stat values for performance
+var cached_stats: Dictionary = {}
+var stats_dirty: bool = true
 
-## Initialize all available upgrades
-func _initialize_upgrades() -> void:
-	# Backpack upgrades (each level adds +1 to grid size)
-	_add_upgrade("backpack_1", "Bigger Backpack", "Expand inventory to 6×6", 50,
-		"Backpack", "grid_size", 1.0, Vector2i(0, 0), [], 1, 50)
-	_add_upgrade("backpack_2", "Large Backpack", "Expand inventory to 7×7", 100,
-		"Backpack", "grid_size", 1.0, Vector2i(0, 1), ["backpack_1"], 1, 100)
-	_add_upgrade("backpack_3", "Huge Backpack", "Expand inventory up to 10×10", 200,
-		"Backpack", "grid_size", 1.0, Vector2i(0, 2), ["backpack_2"], 3, 150)
+func _ready():
+	if not upgrades_collection:
+		push_error("UpgradeManager: No upgrades_collection assigned!")
+		return
 	
-	# Run time upgrades (each level adds +10s to run duration)
-	_add_upgrade("run_time_1", "Extra Time I", "Increase run time by 10s", 50,
-		"Time", "run_time", 10.0, Vector2i(1, 0), [], 1, 50)
-	_add_upgrade("run_time_2", "Extra Time II", "Increase run time by 20s", 100,
-		"Time", "run_time", 10.0, Vector2i(1, 1), ["run_time_1"], 1, 100)
-	_add_upgrade("run_time_3", "Extra Time III", "Increase run time by 30s", 200,
-		"Time", "run_time", 10.0, Vector2i(1, 2), ["run_time_2"], 3, 150)
+	# Initialize all upgrades to level 0
+	for upgrade in upgrades_collection.upgrades:
+		upgrade_levels[upgrade.id] = 0
 	
-	# Pickaxe upgrades
-	_add_upgrade("pickaxe_speed_1", "Fast Swing", "Mine faster", 60,
-		"Pickaxe", "pickaxe_speed", 0.2, Vector2i(2, 0), [], 3, 60)
-	_add_upgrade("pickaxe_speed_2", "Rapid Swing", "Mine even faster", 120,
-		"Pickaxe", "pickaxe_speed", 0.2, Vector2i(2, 1), ["pickaxe_speed_1"], 3, 80)
-	_add_upgrade("pickaxe_power_1", "Power Strike", "Break multiple blocks", 200,
-		"Pickaxe", "pickaxe_power", 1.0, Vector2i(3, 1), ["pickaxe_speed_1"], 2, 200)
-	
-	# Movement upgrades
-	_add_upgrade("move_speed_1", "Sprint Boots", "Move faster", 80,
-		"Movement", "move_speed", 0.15, Vector2i(4, 0), [], 3, 80)
-	_add_upgrade("jump_height_1", "Jump Boost", "Jump higher", 100,
-		"Movement", "jump_height", 0.2, Vector2i(4, 1), [], 3, 100)
-	_add_upgrade("double_jump", "Double Jump", "Jump again in mid-air", 250,
-		"Movement", "special", 1.0, Vector2i(5, 1), ["jump_height_1"], 1, 250)
+	_recalculate_stats()
+	print("UpgradeManager initialized with ", upgrades_collection.upgrades.size(), " upgrades")
 
-func _add_upgrade(id: String, upgrade_name: String, desc: String, base_cost: int,
-	category: String, type: String, value: float, pos: Vector2i, reqs: Array,
-	max_lvl: int, cost_step: int) -> void:
-	# Create upgrade as dictionary (simpler than Resource for now)
-	var upgrade = {
-		"id": id,
-		"display_name": upgrade_name,
-		"description": desc,
-		"base_cost": base_cost,
-		"cost_step": cost_step, # How much the cost increases per level
-		"category": category,
-		"upgrade_type": type,
-		"value_per_level": value,
-		"tree_position": pos,
-		"required_upgrades": reqs.duplicate(),
-		"current_level": 0,
-		"max_level": max_lvl
-	}
-	
-	upgrades[id] = upgrade
-	upgrade_levels[id] = 0
-
-## Attempt to purchase an upgrade
+## Purchase an upgrade
 func purchase_upgrade(upgrade_id: String) -> bool:
-	print("=== Attempting to purchase: ", upgrade_id, " ===")
-	
-	if not upgrades.has(upgrade_id):
-		print("ERROR: Upgrade not found: ", upgrade_id)
+	var upgrade = upgrades_collection.get_upgrade(upgrade_id)
+	if not upgrade:
+		push_warning("Upgrade not found: ", upgrade_id)
 		return false
 	
-	if not GameManager:
-		push_error("GameManager not found!")
+	var current_level = get_upgrade_level(upgrade_id)
+	
+	# Check if at max level
+	if current_level >= upgrade.max_level:
+		print("Already at max level for: ", upgrade_id)
 		return false
 	
-	var upgrade = upgrades[upgrade_id]
-	print("Upgrade info: Level ", upgrade.current_level, "/", upgrade.max_level)
-	
-	# Check if maxed out
-	if upgrade.current_level >= upgrade.max_level:
-		print("ERROR: Already maxed out")
-		return false
-	
-	# Calculate cost based on level (base_cost + (current_level * cost_step))
-	var upgrade_cost = upgrade.base_cost + (upgrade.current_level * upgrade.cost_step)
-	print("Cost: ", upgrade_cost, " | Available money: ", GameManager.total_money)
-	
-	# Check if can afford
-	if GameManager.total_money < upgrade_cost:
-		print("ERROR: Not enough money")
+	# Check cost
+	var cost = upgrade.get_cost(current_level)
+	if GameManager.total_money < cost:
+		print("Not enough money. Have: ", GameManager.total_money, " Need: ", cost)
 		return false
 	
 	# Check prerequisites
-	for req_id in upgrade.required_upgrades:
-		if not upgrade_levels.has(req_id) or upgrade_levels[req_id] == 0:
-			print("ERROR: Missing prerequisite: ", req_id)
-			return false
-	
-	print("All checks passed - purchasing!")
+	if not _check_prerequisites(upgrade):
+		print("Prerequisites not met for: ", upgrade_id)
+		return false
 	
 	# Purchase
-	GameManager.total_money -= upgrade_cost
-	upgrade.current_level += 1
-	upgrade_levels[upgrade_id] = upgrade.current_level
+	GameManager.total_money -= cost
+	upgrade_levels[upgrade_id] = current_level + 1
+	stats_dirty = true
 	
-	upgrade_purchased.emit(upgrade_id, upgrade.current_level)
-	stats_changed.emit()
+	print("Purchased upgrade: ", upgrade.display_name, " Level ", upgrade_levels[upgrade_id])
 	
-	print("SUCCESS: Purchased upgrade: ", upgrade_id, " Level: ", upgrade.current_level, " Cost: ", upgrade_cost)
+	upgrade_purchased.emit(upgrade_id, upgrade_levels[upgrade_id])
+	purchase_state_changed.emit()
+	
 	return true
 
-## Get all upgrades in a category
-func get_upgrades_by_category(category: String) -> Array:
-	var result: Array = []
-	for upgrade_id in upgrades:
-		var upgrade = upgrades[upgrade_id]
-		if upgrade.category == category:
-			result.append(upgrade)
-	return result
+## Check if prerequisites are met
+func _check_prerequisites(upgrade: UpgradeResource) -> bool:
+	for required_id in upgrade.required_upgrades:
+		var req_level = get_upgrade_level(required_id)
+		if req_level < upgrade.required_level:
+			print("Missing prerequisite: ", required_id, " (need level ", upgrade.required_level, ", have ", req_level, ")")
+			return false
+	return true
 
-## Get total stat value from upgrades
-func get_stat_value(upgrade_type: String) -> float:
-	var total: float = 0.0
-	for upgrade_id in upgrades:
-		var upgrade = upgrades[upgrade_id]
-		if upgrade.upgrade_type == upgrade_type and upgrade.current_level > 0:
-			total += upgrade.value_per_level * upgrade.current_level
-	return total
-
-## Check if player has a specific upgrade
-func has_upgrade(upgrade_id: String) -> bool:
-	return upgrade_levels.get(upgrade_id, 0) > 0
-
-## Get upgrade level
+## Get current level of an upgrade
 func get_upgrade_level(upgrade_id: String) -> int:
 	return upgrade_levels.get(upgrade_id, 0)
 
-## Get the cost of the next level for an upgrade
-func get_upgrade_cost(upgrade_id: String) -> int:
-	if not upgrades.has(upgrade_id):
-		return 0
+## Check if upgrade can be purchased
+func can_purchase(upgrade_id: String) -> bool:
+	var upgrade = upgrades_collection.get_upgrade(upgrade_id)
+	if not upgrade:
+		return false
 	
-	var upgrade = upgrades[upgrade_id]
-	if upgrade.current_level >= upgrade.max_level:
-		return 0
+	var current_level = get_upgrade_level(upgrade_id)
 	
-	# Calculate cost: base_cost + (current_level * cost_step)
-	return upgrade.base_cost + (upgrade.current_level * upgrade.cost_step)
+	# Check max level
+	if current_level >= upgrade.max_level:
+		return false
+	
+	# Check cost
+	var cost = upgrade.get_cost(current_level)
+	if GameManager.total_money < cost:
+		return false
+	
+	# Check prerequisites
+	if not _check_prerequisites(upgrade):
+		return false
+	
+	return true
 
-## Get current backpack size
+## Get total stat value from all upgrades
+func get_stat_value(stat_name: String) -> float:
+	if stats_dirty:
+		_recalculate_stats()
+	
+	return cached_stats.get(stat_name, 0.0)
+
+## Recalculate all stat bonuses
+func _recalculate_stats():
+	cached_stats.clear()
+	
+	if not upgrades_collection:
+		return
+	
+	for upgrade in upgrades_collection.upgrades:
+		if upgrade.stat_name == "":
+			continue
+		
+		var level = get_upgrade_level(upgrade.id)
+		if level <= 0:
+			continue
+		
+		var value = upgrade.get_value(level)
+		
+		if upgrade.upgrade_type == UpgradeResource.UpgradeType.MULTIPLIER:
+			# Multipliers stack multiplicatively
+			var current = cached_stats.get(upgrade.stat_name, 1.0)
+			cached_stats[upgrade.stat_name] = current * (1.0 + value / 100.0)
+		else:
+			# Stat boosts stack additively
+			var current = cached_stats.get(upgrade.stat_name, 0.0)
+			cached_stats[upgrade.stat_name] = current + value
+	
+	stats_dirty = false
+
+## Get all upgrades
+func get_all_upgrades() -> Array[UpgradeResource]:
+	if upgrades_collection:
+		return upgrades_collection.upgrades
+	return []
+
+## Get upgrades by tier
+func get_upgrades_by_tier(tier: int) -> Array[UpgradeResource]:
+	if upgrades_collection:
+		return upgrades_collection.get_upgrades_by_tier(tier)
+	return []
+
+## Get upgrade resource by ID
+func get_upgrade(upgrade_id: String) -> UpgradeResource:
+	if upgrades_collection:
+		return upgrades_collection.get_upgrade(upgrade_id)
+	return null
+
+## Get cost for next level of upgrade
+func get_upgrade_cost(upgrade_id: String) -> int:
+	var upgrade = get_upgrade(upgrade_id)
+	if not upgrade:
+		return 0
+	return upgrade.get_cost(get_upgrade_level(upgrade_id))
+
+## Backward compatibility functions
 func get_backpack_size() -> int:
 	return 5 + int(get_stat_value("grid_size"))
+	
+func get_ore_size() -> int:
+	return int(get_stat_value("ore_size"))
 
-## Get current run time capacity
 func get_run_time() -> float:
-	return 30.0 + get_stat_value("run_time") # Base 30 seconds
+	return 30.0 + get_stat_value("run_time")
 
-## Get pickaxe speed multiplier
 func get_pickaxe_speed_multiplier() -> float:
 	return 1.0 + get_stat_value("pickaxe_speed")
 
-## Get movement speed multiplier
 func get_move_speed_multiplier() -> float:
 	return 1.0 + get_stat_value("move_speed")
 
-## Get jump height multiplier
 func get_jump_height_multiplier() -> float:
 	return 1.0 + get_stat_value("jump_height")
 
@@ -187,9 +189,9 @@ func load_save_data(data: Dictionary) -> void:
 	var saved_levels = data.get("upgrade_levels", {})
 	
 	for upgrade_id in saved_levels:
-		if upgrades.has(upgrade_id):
-			var level = saved_levels[upgrade_id]
-			upgrades[upgrade_id].current_level = level
-			upgrade_levels[upgrade_id] = level
+		if upgrade_levels.has(upgrade_id):
+			upgrade_levels[upgrade_id] = saved_levels[upgrade_id]
 	
-	stats_changed.emit()
+	stats_dirty = true
+	_recalculate_stats()
+	purchase_state_changed.emit()

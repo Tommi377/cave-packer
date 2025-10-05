@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=2 format=3 uid="uid://bn4n8xosmbg45"]
+
+[ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_qciyw"]
+
+[resource]
+script = ExtResource("1_qciyw")
+id = "pickaxe_damage_1"
+display_name = "Sharper Pickaxe"
+description = "Increase mining damage by +{value}"
+stat_name = "pickaxe_power"
+max_level = 5
+base_cost = 75
+cost_multiplier = 1.7
+value_per_level = 1.0
+tree_position = Vector2(2, 0)

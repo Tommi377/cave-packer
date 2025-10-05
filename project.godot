@@ -17,14 +17,19 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-UpgradeManager="*res://content/upgrades/upgrade_manager.gd"
 GameManager="*res://content/core/game_manager.tscn"
+UpgradeManager="*res://content/upgrades/upgrade_manager.tscn"
 
 [display]
 
 window/size/viewport_width=800
 window/size/viewport_height=600
 window/stretch/mode="viewport"
+
+[gui]
+
+theme/custom="uid://biyo4f13bl4ih"
+theme/custom_font="uid://bhv84rckvxnwy"
 
 [input]
 

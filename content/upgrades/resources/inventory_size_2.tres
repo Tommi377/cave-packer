@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=2 format=3 uid="uid://dm2b6bny6cfki"]
+
+[ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_4yn43"]
+
+[resource]
+script = ExtResource("1_4yn43")
+id = "inventory_size_2"
+display_name = "Massive Storage"
+description = "Increase capacity by +{value} more items"
+stat_name = "grid_size"
+max_level = 5
+base_cost = 300
+cost_multiplier = 2.0
+value_per_level = 2.0
+required_upgrades = Array[String](["inventory_size_1"])
+required_level = 3
+tree_position = Vector2(1, 1)
+tier = 2

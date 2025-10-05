@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=2 format=3 uid="uid://dyn21s876envk"]
+
+[ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_l46gg"]
+
+[resource]
+script = ExtResource("1_l46gg")
+id = "swing_speed_1"
+display_name = "Faster Swing"
+description = "Reduce swing cooldown by {value}%"
+stat_name = "pickaxe_speed"
+max_level = 4
+cost_multiplier = 1.6
+value_per_level = 0.2
+tree_position = Vector2(5, 0)

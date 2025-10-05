@@ -8,8 +8,8 @@ signal item_placed(ore_data: Dictionary)
 signal item_removed(ore_data: Dictionary)
 signal grid_full()
 
-@export var grid_width: int = 5
-@export var grid_height: int = 5
+@export var grid_width: int = 3
+@export var grid_height: int = 3
 
 # Grid state: 2D array where each cell is either null or contains ore_data
 var grid: Array[Array] = []

@@ -13,9 +13,9 @@ signal inventory_mode_changed(is_active: bool)
 # Scene nodes
 @onready var inventory_grid: InventoryGrid = $InventoryGrid
 @onready var info_label: Label = $InfoPanel/InfoLabel
-@onready var drop_zone_list: VBoxContainer = $MainContainer/LeftPanel/DropZonePanel/DropZoneScroll/DropZoneList
-@onready var drop_zone_title: Label = $MainContainer/LeftPanel/DropZoneTitle
-@onready var inventory_container: Control = $MainContainer/RightPanel/InventoryPanel/InventoryContainer
+@onready var drop_zone_list: VBoxContainer = %DropZoneList
+@onready var drop_zone_title: Label = %DropZoneTitle
+@onready var inventory_container: Control = %InventoryContainer
 @onready var held_item_preview: Control = $HeldItemPreview
 
 var held_item: Dictionary = {}
@@ -106,6 +106,9 @@ func _input(event: InputEvent) -> void:
 		if preview_valid and preview_position != Vector2i(-1, -1):
 			_place_held_item()
 			accept_event()
+		else:
+			print("gagaga?")
+			_return_held_item()
 	
 	# Cancel
 	elif event.is_action_pressed("ui_cancel"):
@@ -153,10 +156,11 @@ func _refresh_drop_zone() -> void:
 
 func _create_drop_zone_item_ui(ore_data: Dictionary) -> void:
 	var item_button = Button.new()
-	item_button.custom_minimum_size = Vector2(0, 44)
+	item_button.custom_minimum_size = Vector2(0, 38)
 	item_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	
 	var hbox = HBoxContainer.new()
+	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox.add_theme_constant_override("separation", 10)
 	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE # Let button handle clicks
 	item_button.add_child(hbox)
@@ -173,7 +177,7 @@ func _create_drop_zone_item_ui(ore_data: Dictionary) -> void:
 	var ore_type = ore_data.get("type", "unknown").capitalize()
 	var ore_size = ore_data.get("size", 1)
 	var ore_value = ore_data.get("total_value", 0)
-	label.text = "%s (Size: %d) - $%d" % [ore_type, ore_size, ore_value]
+	label.text = "%s\n(Size: %d) - $%d" % [ore_type, ore_size, ore_value]
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -369,12 +373,12 @@ func _return_held_item() -> void:
 				break
 		held_item = {}
 		held_from_drop_zone = false
-	else:
-		if inventory_grid.try_add_ore(held_item):
-			held_item = {}
-			held_rotation = 0
-		else:
-			print("Cannot return item - no space")
+		
+		#if inventory_grid.try_add_ore(held_item):
+			#held_item = {}
+			#held_rotation = 0
+		#else:
+			#print("Cannot return item - no space")
 	
 	preview_position = Vector2i(-1, -1)
 	held_item_grab_offset = Vector2i.ZERO
@@ -387,7 +391,7 @@ func _return_held_item() -> void:
 func _on_inventory_container_gui_input(event: InputEvent) -> void:
 	if not inventory_mode_active:
 		return
-	
+
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 			# If holding an item, try to place it first

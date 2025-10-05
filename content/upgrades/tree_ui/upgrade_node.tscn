@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://dc1espo1d1u0r"]
+
+[ext_resource type="Script" uid="uid://drxwb82c5q3er" path="res://content/upgrades/tree_ui/upgrade_node.gd" id="1_8apd1"]
+[ext_resource type="Resource" uid="uid://b2kj3sqr618hv" path="res://content/upgrades/resources/jump_height_1.tres" id="2_gpkol"]
+
+[node name="UpgradeNode" type="Button"]
+custom_minimum_size = Vector2(100, 100)
+offset_right = 48.0
+offset_bottom = 48.0
+text = "."
+autowrap_mode = 3
+script = ExtResource("1_8apd1")
+data = ExtResource("2_gpkol")

@@ -7,7 +7,9 @@ extends Node2D
 @onready var deadline_bar: ProgressBar = $UILayer/DeadlineBar
 @onready var deadline_label: Label = $UILayer/DeadlineLabel
 @onready var earnings_label: Label = $UILayer/EarningsLabel
+
 @onready var deposit_box_area: Area2D = $DepositBox/Area2D
+@onready var press_e_label: Label = $DepositBox/Label/PressELabel
 
 var player_near_deposit: bool = false
 
@@ -47,6 +49,8 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact"):
 		if player_near_deposit:
 			_deposit_inventory()
+	if Input.is_key_label_pressed(KEY_O):
+		GameManager.end_run()
 
 func setup_camera() -> void:
 	if player and camera:
@@ -77,11 +81,13 @@ func _on_block_broken(tile_pos: Vector2i, ore_type: String) -> void:
 func _on_deposit_area_entered(body: Node2D):
 	if body is Player:
 		player_near_deposit = true
+		press_e_label.visible = true
 		print("Press E to deposit inventory")
 
 func _on_deposit_area_exited(body: Node2D):
 	if body is Player:
 		player_near_deposit = false
+		press_e_label.visible = false
 
 func _deposit_inventory():
 	if not inventory_ui:

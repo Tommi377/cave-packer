@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=2 format=3 uid="uid://b2kj3sqr618hv"]
+
+[ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_gq5u4"]
+
+[resource]
+script = ExtResource("1_gq5u4")
+id = "jump_height_1"
+display_name = "Higher Jump"
+description = "Jump +{value} units higher"
+stat_name = "jump_height"
+base_cost = 150
+cost_multiplier = 1.8
+value_per_level = 0.2
+tree_position = Vector2(4, 0)

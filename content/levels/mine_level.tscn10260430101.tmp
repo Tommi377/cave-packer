@@ -90,9 +90,6 @@ shape = SubResource("RectangleShape2D_exit")
 
 [node name="InventoryUI" parent="UILayer" instance=ExtResource("4_inventory")]
 visible = false
-cell_size = 32
-cell_padding = 2
-pickup_radius = 80.0
 
 [node name="DeadlineBar" type="ProgressBar" parent="UILayer"]
 offset_left = 20.0

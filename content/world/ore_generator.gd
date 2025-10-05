@@ -11,8 +11,18 @@ const ORE_TIERS = {
 	"DIAMONG_ORE": {"base_price": 100, "weight": 5, "atlas_coord": Vector2i(3, 4), "color": Color(0.3, 0.8, 0.9)}
 }
 
-# Size distribution (1-8 cells, middle sizes more common)
+const SIZE_WEIGHTS_0 = {
+	1: 5,
+	2: 4,
+	3: 1
+}
+
 const SIZE_WEIGHTS = {
+	0: SIZE_WEIGHTS_0
+}
+
+# Size distribution (1-8 cells, middle sizes more common)
+const SIZE_WEIGHTS_TEST = {
 	1: 5,
 	2: 15,
 	3: 25,
@@ -39,17 +49,21 @@ static func generate_ore_type() -> String:
 	
 	return "IRON_ORE" # Fallback
 
+static func get_size_weights() -> Dictionary:
+	return SIZE_WEIGHTS[UpgradeManager.get_ore_size()]
+
 ## Generate a random ore size based on weights (1-8)
 static func generate_ore_size() -> int:
 	var total_weight = 0
-	for size in SIZE_WEIGHTS:
-		total_weight += SIZE_WEIGHTS[size]
+	var weights := get_size_weights()
+	for size in weights:
+		total_weight += weights[size]
 	
 	var roll = randf() * total_weight
 	var current = 0.0
 	
-	for size in SIZE_WEIGHTS:
-		current += SIZE_WEIGHTS[size]
+	for size in weights:
+		current += weights[size]
 		if roll <= current:
 			return size
 	

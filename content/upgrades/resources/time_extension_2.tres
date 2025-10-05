@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=2 format=3 uid="uid://3im4h83but2b"]
+
+[ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_hux1w"]
+
+[resource]
+script = ExtResource("1_hux1w")
+id = "time_extension_2"
+display_name = "Extended Time II"
+description = "Further increase run time by +{value} seconds"
+stat_name = "run_time"
+base_cost = 150
+cost_multiplier = 1.8
+required_upgrades = Array[String](["time_extension_1"])
+required_level = 3
+tree_position = Vector2(0, 1)
+tier = 2

@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=3 uid="uid://5djymm38obqa"]
+
+[ext_resource type="Script" uid="uid://cac7ey8q605pt" path="res://content/upgrades/tree_ui/tree_ui.gd" id="1_n1xbc"]
+[ext_resource type="PackedScene" uid="uid://dc1espo1d1u0r" path="res://content/upgrades/tree_ui/upgrade_node.tscn" id="2_y5kjy"]
+[ext_resource type="Resource" uid="uid://dhyifha0ixy2w" path="res://content/upgrades/resources/inventory_size_1.tres" id="3_ye023"]
+[ext_resource type="Resource" uid="uid://dm2b6bny6cfki" path="res://content/upgrades/resources/inventory_size_2.tres" id="4_g4lhq"]
+
+[node name="TreeUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_n1xbc")
+
+[node name="UpgradeNode" parent="." instance=ExtResource("2_y5kjy")]
+layout_mode = 0
+offset_right = 100.0
+offset_bottom = 100.0
+text = "Bigger Backpack"
+data = ExtResource("3_ye023")
+
+[node name="UpgradeNode2" parent="." instance=ExtResource("2_y5kjy")]
+layout_mode = 0
+offset_left = 201.0
+offset_right = 301.0
+offset_bottom = 100.0
+text = "Massive Storage"
+data = ExtResource("4_g4lhq")
