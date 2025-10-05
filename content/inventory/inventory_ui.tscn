@@ -11,9 +11,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_inventory")
-cell_size = null
-cell_padding = null
-pickup_radius = null
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -64,6 +61,7 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(0, 300)
 layout_mode = 2
 size_flags_vertical = 4
+mouse_filter = 1
 
 [node name="DropZoneScroll" type="ScrollContainer" parent="MainContainer/LeftPanel/DropZonePanel"]
 layout_mode = 2

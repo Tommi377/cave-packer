@@ -47,6 +47,9 @@ func _ready() -> void:
 	# Connect inventory container's gui_input signal
 	inventory_container.gui_input.connect(_on_inventory_container_gui_input)
 	
+	# Connect main UI's gui_input for detecting drops outside the grid
+	gui_input.connect(_gui_input)
+	
 	visible = false
 	inventory_mode_active = false
 	_update_ui()
@@ -106,9 +109,6 @@ func _input(event: InputEvent) -> void:
 		if preview_valid and preview_position != Vector2i(-1, -1):
 			_place_held_item()
 			accept_event()
-		else:
-			print("gagaga?")
-			_return_held_item()
 	
 	# Cancel
 	elif event.is_action_pressed("ui_cancel"):
@@ -276,7 +276,7 @@ func _update_inventory_grid_display() -> void:
 	for y in range(grid_height):
 		for x in range(grid_width):
 			var cell = grid_cells[cell_idx]
-			var cell_color = Color(0.2, 0.2, 0.2, 1.0)
+			var cell_color = Color(0.47, 0.328, 0.328, 1.0)
 			
 			# Show ore color if occupied
 			if grid_state[y][x] != null:
@@ -321,6 +321,10 @@ func _draw_held_item() -> void:
 		- held_item_grab_offset.y * (cell_size + cell_padding)
 	)
 	
+	var shape_table = {}
+	for shape_offset in shape:
+		shape_table[shape_offset] = true
+	
 	# Draw centered on cursor with offset
 	for shape_offset in shape:
 		var cell_pos = mouse_pos + offset_pixels + Vector2(
@@ -330,6 +334,7 @@ func _draw_held_item() -> void:
 		var cell_rect = Rect2(cell_pos, Vector2(cell_size, cell_size))
 		held_item_preview.draw_rect(cell_rect, ore_color)
 		held_item_preview.draw_rect(cell_rect, Color.WHITE, false, 2.0)
+
 	
 	# Draw info text below the item
 	var ore_type = held_item.get("type", "unknown").capitalize()
@@ -346,9 +351,10 @@ func _place_held_item() -> void:
 		return
 	
 	if inventory_grid.place_item(held_item, preview_position, held_rotation):
-		if held_from_drop_zone:
-			_remove_ore_from_world(held_item)
+		var was_from_drop_zone = held_from_drop_zone
+		var item_to_remove = held_item.duplicate() # Store a copy before clearing
 		
+		# Clear held item state first
 		held_item = {}
 		held_rotation = 0
 		preview_position = Vector2i(-1, -1)
@@ -358,7 +364,11 @@ func _place_held_item() -> void:
 		# Clear the held item preview
 		held_item_preview.queue_redraw()
 		
-		_update_ui()
+		# Remove from world if it came from drop zone (do this after clearing held_item)
+		if was_from_drop_zone:
+			await _remove_ore_from_world(item_to_remove)
+		else:
+			_update_ui()
 
 func _return_held_item() -> void:
 	if held_item.is_empty():
@@ -399,25 +409,42 @@ func _on_inventory_container_gui_input(event: InputEvent) -> void:
 				if preview_valid and preview_position != Vector2i(-1, -1):
 					_place_held_item()
 					return
-			
-			# Otherwise, try to pick up an item
-			# event.position is already local to inventory_container
-			var local_pos = event.position
-			var grid_x = int(local_pos.x / (cell_size + cell_padding))
-			var grid_y = int(local_pos.y / (cell_size + cell_padding))
-			var grid_pos = Vector2i(grid_x, grid_y)
-			
-			var ore_data = inventory_grid.remove_item_at(grid_pos)
-			if not ore_data.is_empty():
-				held_item = ore_data
-				held_from_drop_zone = false
-				held_rotation = 0 # Reset rotation when picking up
+			else:
+				# Otherwise, try to pick up an item
+				# event.position is already local to inventory_container
+				var local_pos = event.position
+				var grid_x = int(local_pos.x / (cell_size + cell_padding))
+				var grid_y = int(local_pos.y / (cell_size + cell_padding))
+				var grid_pos = Vector2i(grid_x, grid_y)
 				
-				# Calculate grab offset - which cell of the ore was clicked
-				var ore_origin = ore_data.get("grid_position", Vector2i(0, 0))
-				held_item_grab_offset = grid_pos - ore_origin
+				var ore_data = inventory_grid.remove_item_at(grid_pos)
+				if not ore_data.is_empty():
+					held_item = ore_data
+					held_from_drop_zone = false
+					held_rotation = 0 # Reset rotation when picking up
+					
+					# Calculate grab offset - which cell of the ore was clicked
+					var ore_origin = ore_data.get("grid_position", Vector2i(0, 0))
+					held_item_grab_offset = grid_pos - ore_origin
+					
+					_update_ui()
+
+func _gui_input(event: InputEvent) -> void:
+	if not inventory_mode_active:
+		return
+	
+	# Handle mouse release for dropping items outside the grid
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+			if not held_item.is_empty():
+				# Check if mouse is outside the inventory grid
+				var mouse_pos = inventory_container.get_local_mouse_position()
+				var grid_rect = Rect2(Vector2.ZERO, inventory_container.size)
 				
-				_update_ui()
+				if not grid_rect.has_point(mouse_pos):
+					# Mouse is outside grid - drop item into world
+					_drop_item_to_world()
+					return
 
 func _remove_ore_from_world(ore_data: Dictionary) -> void:
 	if ore_data.has("world_node"):
@@ -425,23 +452,24 @@ func _remove_ore_from_world(ore_data: Dictionary) -> void:
 		if is_instance_valid(ore_node):
 			ore_node.queue_free()
 	
-	# Refresh drop zone to remove from list
+	# Wait for the node to be fully removed before refreshing
 	await get_tree().process_frame
-	_refresh_drop_zone()
+	await get_tree().process_frame # Extra frame to ensure cleanup
+	_update_ui()
 
 func _spawn_ore_in_world(ore_data: Dictionary) -> void:
 	var ore_scene = preload("res://content/world/ore_item.tscn")
 	var ore_instance = ore_scene.instantiate()
 	
 	if player_reference:
-		var spawn_offset = Vector2(randf_range(-30, 30), randf_range(-30, -10))
-		ore_instance.global_position = player_reference.global_position + spawn_offset
+		ore_instance.global_position = player_reference.global_position
 	
 	ore_instance.initialize(
 		ore_data.get("type", "IRON_ORE"),
 		ore_data.get("size", 1),
-		ore_data.get("price", 10),
+		ore_data.get("base_price", 10),
 		ore_data.get("shape", [Vector2i(0, 0)]),
+		ore_data.get("atlas_coord", Vector2i(0, 4)),
 		ore_data.get("color", Color.GRAY)
 	)
 	
@@ -449,6 +477,36 @@ func _spawn_ore_in_world(ore_data: Dictionary) -> void:
 	
 	await get_tree().process_frame
 	_refresh_drop_zone()
+
+func _drop_item_to_world() -> void:
+	if held_item.is_empty():
+		return
+	
+	print("Dropping item to world: ", held_item.get("type", "unknown"))
+	
+	# If item was from drop zone, just return it to the world (it already exists)
+	if held_from_drop_zone:
+		# Show the item again in the drop zone list
+		for i in range(drop_zone_items.size()):
+			if drop_zone_items[i].get("world_node") == held_item.get("world_node"):
+				if i < drop_zone_item_nodes.size():
+					drop_zone_item_nodes[i].visible = true
+				break
+	else:
+		# Item was from inventory, spawn it in the world
+		_spawn_ore_in_world(held_item)
+	
+	# Clear held item
+	held_item = {}
+	held_rotation = 0
+	preview_position = Vector2i(-1, -1)
+	held_from_drop_zone = false
+	held_item_grab_offset = Vector2i.ZERO
+	
+	# Clear the held item preview
+	held_item_preview.queue_redraw()
+	
+	_update_ui()
 
 func _update_ui() -> void:
 	_update_info_label()

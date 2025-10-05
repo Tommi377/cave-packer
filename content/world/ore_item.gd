@@ -13,6 +13,7 @@ signal picked_up(ore: OreItem)
 
 var total_value: int = 0
 var pickup_radius: float = 32.0
+var atlas_coord: Vector2i = Vector2i(0, 4) # Default atlas coordinate
 
 @onready var sprite: ColorRect = $Sprite
 @onready var area: Area2D = $Area2D
@@ -38,14 +39,19 @@ func _ready():
 	if area:
 		area.body_entered.connect(_on_body_entered)
 
-func initialize(type: String, size: int, price: int, cells: Array[Vector2i], atlas_coord: Vector2i, color: Color = Color.WHITE):
+func initialize(type: String, size: int, price: int, cells: Array[Vector2i], atlas_coord_param: Vector2i, color: Color = Color.WHITE):
 	ore_type = type
 	ore_size = size
 	base_price = price
 	shape_cells = cells.duplicate()
 	ore_color = color
-	sprite_2d.texture.region = Rect2(Vector2(atlas_coord) * Vector2(16, 16), Vector2(16, 16))
+	atlas_coord = atlas_coord_param
 	total_value = base_price * size
+	
+	# Set atlas texture region if sprite exists
+	if sprite_2d and sprite_2d.texture:
+		if sprite_2d.texture is AtlasTexture:
+			sprite_2d.texture.region = Rect2(Vector2(atlas_coord) * Vector2(16, 16), Vector2(16, 16))
 	
 	_set_ore_color()
 	
@@ -87,5 +93,6 @@ func get_inventory_data() -> Dictionary:
 		"base_price": base_price,
 		"total_value": total_value,
 		"shape": shape_cells,
-		"color": ore_color
+		"color": ore_color,
+		"atlas_coord": atlas_coord
 	}
