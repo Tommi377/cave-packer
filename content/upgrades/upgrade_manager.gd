@@ -41,10 +41,14 @@ func purchase_upgrade(upgrade_id: String) -> bool:
 		print("Already at max level for: ", upgrade_id)
 		return false
 	
-	# Check cost
-	var cost = upgrade.get_cost(current_level)
-	if GameManager.total_money < cost:
-		print("Not enough money. Have: ", GameManager.total_money, " Need: ", cost)
+	# Check cost (multi-currency)
+	var costs = upgrade.get_currency_costs(current_level)
+	if not GameManager.has_currencies(costs):
+		print("Not enough currency. Need: ", costs)
+		print("Have: Iron=", GameManager.get_currency("iron"),
+			" Copper=", GameManager.get_currency("copper"),
+			" Gold=", GameManager.get_currency("gold"),
+			" Diamond=", GameManager.get_currency("diamond"))
 		return false
 	
 	# Check prerequisites
@@ -52,8 +56,10 @@ func purchase_upgrade(upgrade_id: String) -> bool:
 		print("Prerequisites not met for: ", upgrade_id)
 		return false
 	
-	# Purchase
-	GameManager.total_money -= cost
+	# Purchase (spend currencies)
+	if not GameManager.spend_currencies(costs):
+		return false
+		
 	upgrade_levels[upgrade_id] = current_level + 1
 	stats_dirty = true
 	
@@ -68,7 +74,7 @@ func purchase_upgrade(upgrade_id: String) -> bool:
 func _check_prerequisites(upgrade: UpgradeResource) -> bool:
 	for required_id in upgrade.required_upgrades:
 		var req_level = get_upgrade_level(required_id)
-		if req_level < upgrade.required_level:
+		if req_level == 0:
 			print("Missing prerequisite: ", required_id, " (need level ", upgrade.required_level, ", have ", req_level, ")")
 			return false
 	return true
@@ -89,9 +95,9 @@ func can_purchase(upgrade_id: String) -> bool:
 	if current_level >= upgrade.max_level:
 		return false
 	
-	# Check cost
-	var cost = upgrade.get_cost(current_level)
-	if GameManager.total_money < cost:
+	# Check cost (multi-currency)
+	var costs = upgrade.get_currency_costs(current_level)
+	if not GameManager.has_currencies(costs):
 		return false
 	
 	# Check prerequisites
@@ -153,12 +159,12 @@ func get_upgrade(upgrade_id: String) -> UpgradeResource:
 		return upgrades_collection.get_upgrade(upgrade_id)
 	return null
 
-## Get cost for next level of upgrade
-func get_upgrade_cost(upgrade_id: String) -> int:
+## Get multi-currency costs for next level
+func get_upgrade_currency_costs(upgrade_id: String) -> Dictionary:
 	var upgrade = get_upgrade(upgrade_id)
 	if not upgrade:
-		return 0
-	return upgrade.get_cost(get_upgrade_level(upgrade_id))
+		return {}
+	return upgrade.get_currency_costs(get_upgrade_level(upgrade_id))
 
 ## Backward compatibility functions
 func get_backpack_size() -> int:

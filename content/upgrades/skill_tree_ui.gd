@@ -13,7 +13,6 @@ signal purchase_requested(upgrade_id: String)
 @onready var upgrade_desc_label: Label = $InfoPanel/MarginContainer/VBox/Description
 @onready var upgrade_cost_label: Label = $InfoPanel/MarginContainer/VBox/Cost
 @onready var upgrade_level_label: Label = $InfoPanel/MarginContainer/VBox/Level
-@onready var purchase_button: Button = $InfoPanel/MarginContainer/VBox/PurchaseButton
 
 const CELL_SIZE = 100
 const NODE_SIZE = 80
@@ -25,23 +24,10 @@ var last_can_purchase: bool = false # Track state changes
 func _ready():
 	initialize()
 
-# Update purchase button state every frame when info panel is visible
-func _process(_delta):
-	pass
-	#if info_panel.visible and selected_upgrade_id != "":
-		#var can_buy = can_purchase(selected_upgrade_id)
-		#purchase_button.disabled = not can_buy
-		#
-		## Debug info only when state changes
-		#if can_buy != last_can_purchase:
-			#last_can_purchase = can_buy
-			#if GameManager:
-				#var cost = UpgradeManager.get_upgrade_cost(selected_upgrade_id)
-				#print("Purchase state changed - Money: ", GameManager.total_money, " Cost: ", cost, " Can buy: ", can_buy)
-	
 func initialize():
 	tree_ui.initialize()
 	tree_ui.upgrade_pressed.connect(_on_purchase_button_pressed)
+	tree_ui.upgrade_hovered.connect(_on_upgrade_button_hovered)
 
 func can_purchase(upgrade_id: String) -> bool:
 	if not UpgradeManager:
@@ -53,8 +39,8 @@ func refresh_tree():
 	tree_ui.refresh_tree()
 		
 	## Update info panel if something is selected
-	#if selected_upgrade_id != "":
-		#_show_upgrade_info(selected_upgrade_id)
+	if selected_upgrade_id != "":
+		_show_upgrade_info(selected_upgrade_id)
 		
 	queue_redraw()
 
@@ -81,42 +67,25 @@ func _show_upgrade_info(upgrade_id: String):
 	# Use the upgrade resource's description formatting
 	var desc = upgrade.get_description_with_values(current_level)
 	
-	# Add prerequisite info if locked
-	if upgrade.required_upgrades.size() > 0:
-		var all_reqs_met = true
-		var req_text = "\n\nRequires:"
-		for req_id in upgrade.required_upgrades:
-			var req = UpgradeManager.get_upgrade(req_id)
-			if not req:
-				continue
-			
-			var req_level = UpgradeManager.get_upgrade_level(req_id)
-			if req_level < upgrade.required_level:
-				req_text += "\n  ✗ " + req.display_name + " (Level " + str(upgrade.required_level) + ")"
-				all_reqs_met = false
-			else:
-				req_text += "\n  ✓ " + req.display_name
-		
-		if not all_reqs_met:
-			desc += req_text
-	
 	upgrade_desc_label.text = desc
 	
-	var cost = upgrade.get_cost(current_level)
+	# Multi-currency cost display
+	var costs = upgrade.get_currency_costs(current_level)
 	if current_level >= upgrade.max_level:
 		upgrade_cost_label.text = "MAXED OUT"
-		purchase_button.text = "Maxed"
-	elif cost > 0:
-		if GameManager:
-			upgrade_cost_label.text = "Cost: %d (You have: %d)" % [cost, GameManager.total_money]
-		else:
-			upgrade_cost_label.text = "Cost: %d" % cost
-		purchase_button.text = "Purchase"
+	elif not costs.is_empty():
+		var cost_text = "Cost: "
+		var cost_parts = []
+		for ore_type in costs:
+			var ore_name = ore_type.capitalize()
+			cost_parts.append("%d %s" % [costs[ore_type], ore_name])
+		upgrade_cost_label.text = cost_text + ", ".join(cost_parts)
+	else:
+		upgrade_cost_label.text = "Free"
 	
 	upgrade_level_label.text = "Level: %d/%d" % [current_level, upgrade.max_level]
-	
-	purchase_button.disabled = not can_purchase(upgrade_id)
 	
 func _on_purchase_button_pressed(id: String):
 	print("Upgrade %s pressed!" % [id])
 	purchase_requested.emit(id)
+	refresh_tree()

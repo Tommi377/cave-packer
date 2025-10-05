@@ -9,3 +9,11 @@ display_name = "Extended Time I"
 description = "Increase run time by +{value} seconds"
 stat_name = "run_time"
 base_cost = 50
+currency_costs = {
+"copper": 5,
+"iron": 10
+}
+cost_scaling = {
+"copper": 1.5,
+"iron": 1.5
+}

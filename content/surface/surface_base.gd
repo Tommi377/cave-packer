@@ -44,7 +44,12 @@ func _on_purchase_requested(upgrade_id: String):
 			
 func _update_currency_display():
 	if GameManager:
-		currency_label.text = "Credits: %d" % GameManager.total_money
+		currency_label.text = "Iron: %d\nCopper: %d\nGold: %d\nDiamond: %d" % [
+			GameManager.get_currency("iron"),
+			GameManager.get_currency("copper"),
+			GameManager.get_currency("gold"),
+			GameManager.get_currency("diamond")
+		]
 
 func _on_run_ended():
 	# Refresh currency display and skill tree after run

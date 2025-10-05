@@ -122,11 +122,14 @@ static func generate_ore_data(ore_type: String = "") -> Dictionary:
 	var shape = generate_connected_shape(ore_size)
 	var tier_data = get_ore_data(ore_type)
 	
+	# Normalize ore type to simple name (remove _ORE suffix)
+	var simple_type = ore_type.to_lower().replace("_ore", "")
+	
 	return {
-		"type": ore_type,
+		"type": simple_type, # Use simple type name: "iron", "copper", etc.
 		"size": ore_size,
-		"base_price": tier_data.base_price,
-		"total_value": tier_data.base_price * ore_size,
+		"base_price": tier_data.base_price, # Legacy field
+		"total_value": ore_size, # New system: value = size
 		"atlas_coord": tier_data.atlas_coord,
 		"shape": shape,
 		"color": tier_data.color

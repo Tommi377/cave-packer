@@ -39,7 +39,7 @@ func _ready() -> void:
 	# Connect to GameManager updates
 	if GameManager:
 		GameManager.deadline_changed.connect(_on_deadline_changed)
-		GameManager.money_deposited.connect(_on_money_deposited)
+		GameManager.currency_deposited.connect(_on_currency_deposited)
 		GameManager.run_started.connect(_on_run_started)
 		GameManager.run_ended.connect(_on_run_ended)
 		_update_deadline_display(GameManager.current_time, GameManager.max_time)
@@ -98,26 +98,46 @@ func _deposit_inventory():
 	if not inventory_ui:
 		return
 	
-	# Calculate total value from inventory
-	var inventory_value = inventory_ui.inventory_grid.get_total_value()
+	# Get all ore items from inventory and group by type
+	var ore_counts: Dictionary = {}
+	var grid = inventory_ui.inventory_grid.get_grid_state()
+	var counted_items = {}
 	
-	if inventory_value == 0:
+	# Count ores by type
+	for y in range(grid.size()):
+		for x in range(grid[y].size()):
+			var ore_data = grid[y][x]
+			if ore_data != null:
+				# Use grid_position as unique identifier
+				var item_id = str(ore_data.get("grid_position", Vector2i(x, y)))
+				if not counted_items.has(item_id):
+					counted_items[item_id] = true
+					var ore_type = ore_data.get("type", "iron")
+					var ore_size = ore_data.get("size", 1)
+					ore_counts[ore_type] = ore_counts.get(ore_type, 0) + ore_size
+	
+	if ore_counts.is_empty():
 		print("No ores to deposit")
 		return
 	
-	profit_label.text = "+$%d" % [inventory_value]
+	# Display what was deposited
+	var deposit_text = ""
+	for ore_type in ore_counts:
+		deposit_text += "+%d %s\n" % [ore_counts[ore_type], ore_type.capitalize()]
+	
+	profit_label.text = deposit_text.strip_edges()
 	profit_label.visible = true
 	var timer := get_tree().create_timer(2)
 	timer.timeout.connect(func(): profit_label.visible = false)
 	
-	
 	# Deposit to GameManager
 	if GameManager:
-		GameManager.deposit_ores(inventory_value)
+		for ore_type in ore_counts:
+			GameManager.deposit_ores(ore_type, ore_counts[ore_type])
 	
 	# Clear inventory after successful deposit
 	inventory_ui.inventory_grid.clear_all()
-	print("Deposited inventory worth ", inventory_value, " credits")
+	print("Deposited inventory: ", ore_counts)
 
 func _toggle_upgrade_ui():
 	# No longer needed - removed upgrade UI from mine level
@@ -127,6 +147,9 @@ func _on_deadline_changed(current: float, max_value: float):
 	_update_deadline_display(current, max_value)
 
 func _on_money_deposited(_amount: int):
+	_update_earnings_display()
+
+func _on_currency_deposited(_ore_type: String, _amount: int):
 	_update_earnings_display()
 
 func _on_run_started():
@@ -161,7 +184,12 @@ func _update_deadline_display(current: float, max_value: float):
 func _update_earnings_display():
 	if GameManager:
 		if earnings_label:
-			earnings_label.text = "Money: $%d" % GameManager.total_money
+			earnings_label.text = "Iron: %d\nCopper: %d\nGold: %d\nDiamond: %d" % [
+				GameManager.get_currency("iron"),
+				GameManager.get_currency("copper"),
+				GameManager.get_currency("gold"),
+				GameManager.get_currency("diamond")
+			]
 
 func _on_purchase_requested(_upgrade_id: String):
 	# No longer needed - upgrade UI is on surface

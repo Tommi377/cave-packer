@@ -10,10 +10,11 @@ class_name Player
 @export var air_friction: float = 400.0
 
 @export_group("Jump")
-@export var jump_velocity: float = -380.0
+@export var jump_velocity: float = -270.0
 @export var jump_cut_multiplier: float = 0.5 # How much to reduce velocity when releasing jump early
 @export var coyote_time: float = 0.1 # Time after leaving ground where jump is still allowed
 @export var jump_buffer_time: float = 0.1 # Time before landing where jump input is remembered
+@export var max_air_jumps: int = 0 # Number of additional jumps allowed in air (0 = no double jump, 1 = double jump, 2 = triple jump, etc.)
 
 @export_group("Gravity")
 @export var gravity: float = 980.0
@@ -21,7 +22,7 @@ class_name Player
 @export var fast_fall_multiplier: float = 1.3 # Faster fall when holding down
 
 @export_group("Pickaxe")
-@export var pickaxe_range: float = 32.0
+@export var pickaxe_range: float = 16.0
 @export var pickaxe_cooldown: float = 1.0
 @export var pickaxe_damage: int = 1 # Damage dealt per pickaxe swing
 
@@ -31,6 +32,7 @@ var jump_buffer_timer: float = 0.0
 var pickaxe_timer: float = 0.0
 var is_attacking: bool = false
 var facing_right: bool = true
+var air_jumps_used: int = 0 # Track how many air jumps have been used
 
 # Node references
 @onready var visual: CanvasGroup = %Visual
@@ -49,6 +51,28 @@ func _ready() -> void:
 	# Ensure the player uses the floor detection properly
 	floor_snap_length = 8.0
 	floor_max_angle = deg_to_rad(46) # Spelunky-like slope handling
+	
+	# Apply upgrades
+	apply_upgrades()
+
+func apply_upgrades() -> void:
+	# Check if UpgradeManager exists and apply upgrades
+	if not UpgradeManager:
+		return
+	
+	# Set max air jumps based on double_jump upgrade level
+	# Level 0 = 0 air jumps (no double jump)
+	# Level 1 = 1 air jump (double jump)
+	# Level 2 = 2 air jumps (triple jump), etc.
+	max_air_jumps = UpgradeManager.get_upgrade_level("double_jump")
+	
+	# Apply movement speed multiplier
+	var speed_multiplier = UpgradeManager.get_move_speed_multiplier()
+	move_speed *= speed_multiplier
+	
+	# Apply jump height multiplier
+	var jump_multiplier = UpgradeManager.get_jump_height_multiplier()
+	jump_velocity *= jump_multiplier
 
 func _physics_process(delta: float) -> void:
 	update_timers(delta)
@@ -70,6 +94,7 @@ func _physics_process(delta: float) -> void:
 	
 	if is_on_floor():
 		coyote_timer = coyote_time
+		air_jumps_used = 0 # Reset air jumps when landing
 	else:
 		coyote_timer -= delta
 
@@ -97,12 +122,18 @@ func handle_jump() -> void:
 	if Input.is_action_just_pressed("jump"):
 		jump_buffer_timer = jump_buffer_time
 	
-	# Perform jump if conditions are met
+	# Perform regular jump if conditions are met (on ground or coyote time)
 	if jump_buffer_timer > 0 and coyote_timer > 0:
 		velocity.y = jump_velocity
 		jump_buffer_timer = 0.0
 		coyote_timer = 0.0
 		# Play jump sound/animation here
+	# Perform air jump if available (double jump, triple jump, etc.)
+	elif Input.is_action_just_pressed("jump") and air_jumps_used < max_air_jumps and not is_on_floor():
+		velocity.y = jump_velocity
+		air_jumps_used += 1
+		# Play air jump sound/animation here
+		print("Air jump %d/%d" % [air_jumps_used, max_air_jumps])
 	
 	# Jump cut: reduce upward velocity if player releases jump early
 	if Input.is_action_just_released("jump") and velocity.y < 0:

@@ -7,11 +7,11 @@ signal picked_up(ore: OreItem)
 
 @export var ore_type: String = "IRON_ORE"
 @export var ore_size: int = 3 # Number of cells (1-8)
-@export var base_price: int = 10
+@export var base_price: int = 10 # Legacy - no longer used for currency
 @export var shape_cells: Array[Vector2i] = [] # Grid positions relative to origin
 @export var ore_color: Color = Color.WHITE # Color for visual display
 
-var total_value: int = 0
+var total_value: int = 0 # Legacy - equals ore_size now
 var pickup_radius: float = 32.0
 var atlas_coord: Vector2i = Vector2i(0, 4) # Default atlas coordinate
 
@@ -21,8 +21,8 @@ var atlas_coord: Vector2i = Vector2i(0, 4) # Default atlas coordinate
 @onready var sprite_2d: Sprite2D = $Sprite2D
 
 func _ready():
-	# Calculate total value
-	total_value = base_price * ore_size
+	# In new system, total_value = ore_size (amount of that ore type)
+	total_value = ore_size
 	
 	# Set color based on ore type
 	_set_ore_color()
@@ -42,11 +42,11 @@ func _ready():
 func initialize(type: String, size: int, price: int, cells: Array[Vector2i], atlas_coord_param: Vector2i, color: Color = Color.WHITE):
 	ore_type = type
 	ore_size = size
-	base_price = price
+	base_price = price # Legacy
 	shape_cells = cells.duplicate()
 	ore_color = color
 	atlas_coord = atlas_coord_param
-	total_value = base_price * size
+	total_value = size # New system: value = size
 	
 	# Set atlas texture region if sprite exists
 	if sprite_2d and sprite_2d.texture:

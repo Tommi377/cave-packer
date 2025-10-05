@@ -6,9 +6,14 @@
 script = ExtResource("1_u0pjb")
 id = "inventory_size_1"
 display_name = "Bigger Backpack"
-description = "Carry +{value} more ore items"
+description = "Make your inventory bigger"
 stat_name = "grid_size"
-max_level = 5
-cost_multiplier = 1.6
+max_level = 1
+currency_costs = {
+"iron": 5
+}
+cost_scaling = {
+"iron": 1.0
+}
 value_per_level = 1.0
 tree_position = Vector2(1, 0)

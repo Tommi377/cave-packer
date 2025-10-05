@@ -194,8 +194,7 @@ func _create_drop_zone_item_ui(ore_data: Dictionary) -> void:
 	var label = Label.new()
 	var ore_type = ore_data.get("type", "unknown").capitalize()
 	var ore_size = ore_data.get("size", 1)
-	var ore_value = ore_data.get("total_value", 0)
-	label.text = "%s\n(Size: %d) - $%d" % [ore_type, ore_size, ore_value]
+	label.text = "%s\n(Size: %d)" % [ore_type, ore_size]
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -530,8 +529,8 @@ func _draw_held_item() -> void:
 	
 	# Draw info text below the item
 	var ore_type = held_item.get("type", "unknown").capitalize()
-	var ore_value = held_item.get("total_value", 0)
-	var info_text = "%s - $%d" % [ore_type, ore_value]
+	var ore_value = held_item.get("size", 0)
+	var info_text = "%s x%d" % [ore_type, ore_value]
 	var text_pos = mouse_pos - Vector2(0, cell_size / 2.0)
 	held_item_preview.draw_string(ThemeDB.fallback_font, text_pos, info_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
 
@@ -575,12 +574,6 @@ func _return_held_item() -> void:
 				break
 		held_item = {}
 		held_from_drop_zone = false
-		
-		#if inventory_grid.try_add_ore(held_item):
-			#held_item = {}
-			#held_rotation = 0
-		#else:
-			#print("Cannot return item - no space")
 	
 	preview_position = Vector2i(-1, -1)
 	held_item_grab_offset = Vector2i.ZERO
@@ -708,17 +701,16 @@ func _update_ui() -> void:
 func _update_info_label() -> void:
 	if info_label == null:
 		return
-	
-	var total_value = inventory_grid.get_total_value()
+
 	var occupied = inventory_grid.get_occupied_count()
 	var total = inventory_grid.grid_width * inventory_grid.grid_height
 	
-	var base_text = "Press Tab to toggle inventory | Value: $%d | Space: %d/%d | Nearby Ores: %d" % [total_value, occupied, total, drop_zone_items.size()]
+	var base_text = "Press Tab to toggle inventory | Space: %d/%d | Nearby Ores: %d" % [occupied, total, drop_zone_items.size()]
 	
 	if not held_item.is_empty():
 		var item_name = held_item.get("type", "unknown").capitalize()
 		var item_value = held_item.get("total_value", 0)
-		info_label.text = "Holding: %s ($%d) | Q/E to rotate | %s" % [item_name, item_value, base_text]
+		info_label.text = "Holding: %s | R to rotate | %s" % [item_name, base_text]
 	else:
 		info_label.text = base_text
 

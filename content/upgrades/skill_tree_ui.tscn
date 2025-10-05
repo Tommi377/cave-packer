@@ -1,10 +1,19 @@
-[gd_scene load_steps=4 format=3 uid="uid://c7t48pbemsa0u"]
+[gd_scene load_steps=7 format=3 uid="uid://c7t48pbemsa0u"]
 
 [ext_resource type="Script" uid="uid://n2qcw6toxd78" path="res://content/upgrades/skill_tree_ui.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://5djymm38obqa" path="res://content/upgrades/tree_ui/tree_ui.tscn" id="2_1obob"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_1obob"]
 font_size = 24
+
+[sub_resource type="LabelSettings" id="LabelSettings_nlmyf"]
+font_size = 24
+
+[sub_resource type="LabelSettings" id="LabelSettings_2865l"]
+font_size = 18
+
+[sub_resource type="LabelSettings" id="LabelSettings_lxq7j"]
+font_size = 18
 
 [node name="SkillTreeUI" type="Control"]
 layout_mode = 3
@@ -57,7 +66,6 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="InfoPanel" type="PanelContainer" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -84,21 +92,22 @@ layout_mode = 2
 [node name="UpgradeName" type="Label" parent="InfoPanel/MarginContainer/VBox"]
 layout_mode = 2
 text = "Upgrade Name"
+label_settings = SubResource("LabelSettings_nlmyf")
 horizontal_alignment = 1
 
 [node name="Description" type="Label" parent="InfoPanel/MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 25)
 layout_mode = 2
 text = "Description goes here"
+label_settings = SubResource("LabelSettings_2865l")
 autowrap_mode = 3
 
 [node name="Cost" type="Label" parent="InfoPanel/MarginContainer/VBox"]
 layout_mode = 2
 text = "Cost: 100"
+label_settings = SubResource("LabelSettings_lxq7j")
 
 [node name="Level" type="Label" parent="InfoPanel/MarginContainer/VBox"]
 layout_mode = 2
 text = "Level: 0/3"
-
-[node name="PurchaseButton" type="Button" parent="InfoPanel/MarginContainer/VBox"]
-layout_mode = 2
-text = "Purchase"
+label_settings = SubResource("LabelSettings_lxq7j")

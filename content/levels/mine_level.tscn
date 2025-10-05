@@ -24,6 +24,9 @@ font_color = Color(0.5686275, 0.85882354, 0.4117647, 1)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_exit"]
 size = Vector2(32, 32)
 
+[sub_resource type="LabelSettings" id="LabelSettings_etpyw"]
+font_size = 18
+
 [sub_resource type="LabelSettings" id="LabelSettings_7d71p"]
 font_size = 24
 outline_size = 8
@@ -31,9 +34,6 @@ outline_color = Color(0.5882353, 0.42352942, 0.42352942, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_oxygen"]
 bg_color = Color(0.2, 0.6, 0.9, 1)
-
-[sub_resource type="LabelSettings" id="LabelSettings_etpyw"]
-font_size = 18
 
 [node name="MineLevel" type="Node2D"]
 script = ExtResource("1_script")
@@ -61,8 +61,9 @@ tile_set = ExtResource("2_tk80j")
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
 position = Vector2(320, -22)
-jump_velocity = -270.0
-pickaxe_range = 16.0
+max_air_jumps = 5
+pickaxe_cooldown = 0.25
+pickaxe_damage = 32
 
 [node name="Camera2D" type="Camera2D" parent="Player"]
 
@@ -86,12 +87,10 @@ offset_left = -42.0
 offset_top = -34.0
 offset_right = 42.0
 offset_bottom = -14.0
-text = "DEPOSIT"
 label_settings = SubResource("LabelSettings_3rynn")
 horizontal_alignment = 1
 
 [node name="PressELabel" type="Label" parent="DepositBox/Label"]
-visible = false
 layout_mode = 0
 offset_left = 1.0
 offset_top = 20.0
@@ -105,13 +104,14 @@ horizontal_alignment = 1
 visible = false
 layout_mode = 0
 offset_left = -35.0
-offset_top = -16.0
+offset_top = -41.0
 offset_right = 113.0
-offset_bottom = 4.0
+offset_bottom = 18.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "+$200"
 label_settings = SubResource("LabelSettings_pa5op")
 horizontal_alignment = 1
+vertical_alignment = 2
 
 [node name="Area2D" type="Area2D" parent="DepositBox"]
 collision_layer = 0
@@ -126,6 +126,20 @@ shape = SubResource("RectangleShape2D_exit")
 [node name="InventoryUI" parent="UILayer" instance=ExtResource("4_inventory")]
 unique_name_in_owner = true
 visible = false
+
+[node name="EarningsLabel" type="Label" parent="UILayer"]
+unique_name_in_owner = true
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -183.0
+offset_top = 16.0
+offset_right = -15.0
+offset_bottom = 282.0
+grow_horizontal = 0
+text = "Earnings: $0"
+label_settings = SubResource("LabelSettings_etpyw")
+horizontal_alignment = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="UILayer"]
 offset_left = 16.0
@@ -166,10 +180,4 @@ show_percentage = false
 unique_name_in_owner = true
 layout_mode = 2
 text = "Time: 5:00"
-label_settings = SubResource("LabelSettings_etpyw")
-
-[node name="EarningsLabel" type="Label" parent="UILayer/VBoxContainer/HBoxContainer/VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Earnings: $0"
 label_settings = SubResource("LabelSettings_etpyw")

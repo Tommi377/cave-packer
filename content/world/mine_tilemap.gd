@@ -188,7 +188,7 @@ func spawn_ore_drop(world_pos: Vector2, ore_type: String) -> void:
 		ore_data.color
 	)
 	
-	print("Spawned ", ore_data.type, " ore (size: ", ore_data.size, ", value: $", ore_data.total_value, ")")
+	print("Spawned ", ore_data.type, " ore (size: ", ore_data.size, ")")
 
 
 ## Check if a tile exists at position

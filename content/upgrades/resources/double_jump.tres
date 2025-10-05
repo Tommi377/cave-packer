@@ -10,7 +10,16 @@ description = "Jump again in mid-air"
 stat_name = "special"
 max_level = 1
 base_cost = 250
-cost_multiplier = 1.0
+currency_costs = {
+"copper": 30,
+"gold": 10,
+"iron": 50
+}
+cost_scaling = {
+"copper": 1.0,
+"gold": 1.0,
+"iron": 1.0
+}
 value_per_level = 1.0
 required_upgrades = Array[String](["jump_height_1"])
 required_level = 3
