@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=3 format=3 uid="uid://ct2w2q5uan0rp"]
+
+[ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_7awqb"]
+[ext_resource type="Resource" uid="uid://d3ik50s342sjl" path="res://content/upgrades/resources/ore_freq_1.tres" id="2_wab7u"]
+
+[resource]
+script = ExtResource("1_7awqb")
+id = "swing_speed_3"
+display_name = "God Swing"
+description = "Reduce swing cooldown by -10%"
+stat_name = "pickaxe_speed"
+max_level = 4
+currency_costs = Dictionary[String, int]({
+"diamond": 9,
+"gold": 21
+})
+value_per_level = 0.1
+required_upgrades = Array[ExtResource("1_7awqb")]([ExtResource("2_wab7u")])

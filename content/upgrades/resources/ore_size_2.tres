@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=4 format=3 uid="uid://blvw7500ik6p7"]
+
+[ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_lcpqs"]
+[ext_resource type="Resource" uid="uid://d3ik50s342sjl" path="res://content/upgrades/resources/ore_freq_1.tres" id="2_cai4s"]
+[ext_resource type="Resource" uid="uid://b3mvu8aa5uvjy" path="res://content/upgrades/resources/swing_speed_2.tres" id="3_bc8vn"]
+
+[resource]
+script = ExtResource("1_lcpqs")
+id = "ore_size_2"
+display_name = "Massive Ores"
+description = "Increase the maximum size of ore blocks by 1"
+stat_name = "ore_size"
+max_level = 4
+currency_costs = Dictionary[String, int]({
+"copper": 40,
+"gold": 15
+})
+value_per_level = 1.0
+required_upgrades = Array[ExtResource("1_lcpqs")]([ExtResource("2_cai4s"), ExtResource("3_bc8vn")])

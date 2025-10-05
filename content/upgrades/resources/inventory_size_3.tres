@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=4 format=3 uid="uid://dl6d4214art4n"]
+
+[ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_0uwf2"]
+[ext_resource type="Resource" uid="uid://boxamarik0laa" path="res://content/upgrades/resources/time_extension_1.tres" id="2_68bvl"]
+[ext_resource type="Resource" uid="uid://dyn21s876envk" path="res://content/upgrades/resources/swing_speed_1.tres" id="3_r3utg"]
+
+[resource]
+script = ExtResource("1_0uwf2")
+id = "inventory_size_3"
+display_name = "Even Bigger Backpack"
+description = "Make your inventory bigger"
+stat_name = "grid_size"
+max_level = 1
+currency_costs = Dictionary[String, int]({
+"copper": 25,
+"gold": 5
+})
+value_per_level = 1.0
+required_upgrades = Array[ExtResource("1_0uwf2")]([ExtResource("2_68bvl"), ExtResource("3_r3utg")])

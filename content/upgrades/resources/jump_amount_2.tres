@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=4 format=3 uid="uid://d4jiug781wobt"]
+
+[ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_qp8hn"]
+[ext_resource type="Resource" uid="uid://dvehgmkqxq8sf" path="res://content/upgrades/resources/ore_value_1.tres" id="2_15jer"]
+[ext_resource type="Resource" uid="uid://cw7v1day1vvc5" path="res://content/upgrades/resources/jump_height_2.tres" id="3_em453"]
+
+[resource]
+script = ExtResource("1_qp8hn")
+id = "jump_amount_2"
+display_name = "Triple Jump"
+description = "Defy god by jumping thrice"
+stat_name = "jump_amount"
+max_level = 1
+currency_costs = Dictionary[String, int]({
+"diamond": 30,
+"gold": 30
+})
+value_per_level = 1.0
+required_upgrades = Array[ExtResource("1_qp8hn")]([ExtResource("2_15jer"), ExtResource("3_em453")])

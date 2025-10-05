@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=3 format=3 uid="uid://ymv2hphdr45"]
+
+[ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_p0cou"]
+[ext_resource type="Resource" uid="uid://dm2b6bny6cfki" path="res://content/upgrades/resources/inventory_size_2.tres" id="2_hqfag"]
+
+[resource]
+script = ExtResource("1_p0cou")
+id = "pickaxe_damage_3"
+display_name = "Gold Pickaxe"
+description = "Increase mining damage by +{value} damage"
+stat_name = "pickaxe_power"
+max_level = 4
+currency_costs = Dictionary[String, int]({
+"gold": 15
+})
+value_per_level = 3.0
+required_upgrades = Array[ExtResource("1_p0cou")]([ExtResource("2_hqfag")])

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=3 format=3 uid="uid://k2peti13k0lf"]
+
+[ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_5klpf"]
+[ext_resource type="Resource" uid="uid://dyn21s876envk" path="res://content/upgrades/resources/swing_speed_1.tres" id="2_5i7xo"]
+
+[resource]
+script = ExtResource("1_5klpf")
+id = "pickaxe_damage_2"
+display_name = "Copper Pickaxe"
+description = "Increase mining damage by +{value} damage"
+stat_name = "pickaxe_power"
+max_level = 4
+currency_costs = Dictionary[String, int]({
+"copper": 8
+})
+value_per_level = 2.0
+required_upgrades = Array[ExtResource("1_5klpf")]([ExtResource("2_5i7xo")])

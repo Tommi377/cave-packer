@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=4 format=3 uid="uid://clcs8pfcaorfu"]
+
+[ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_4njh2"]
+[ext_resource type="Resource" uid="uid://dy5qhuj26pjob" path="res://content/upgrades/resources/jump_amount_1.tres" id="2_vk2yy"]
+[ext_resource type="Resource" uid="uid://ct2w2q5uan0rp" path="res://content/upgrades/resources/swing_speed_3.tres" id="3_c4c5x"]
+
+[resource]
+script = ExtResource("1_4njh2")
+id = "ore_freq_2"
+display_name = "Ore Paradise"
+description = "Chance for an ore to spawn greatly increased"
+stat_name = "ore_freq"
+max_level = 1
+currency_costs = Dictionary[String, int]({
+"diamond": 70,
+"gold": 100
+})
+value_per_level = 1.0
+required_upgrades = Array[ExtResource("1_4njh2")]([ExtResource("2_vk2yy"), ExtResource("3_c4c5x")])

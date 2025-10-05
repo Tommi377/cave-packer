@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=4 format=3 uid="uid://b3mvu8aa5uvjy"]
+
+[ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_yiw2y"]
+[ext_resource type="Resource" uid="uid://bn4n8xosmbg45" path="res://content/upgrades/resources/pickaxe_damage_1.tres" id="2_p7kgf"]
+[ext_resource type="Resource" uid="uid://o7qkuo1k484t" path="res://content/upgrades/resources/ore_size_1.tres" id="3_i4qfp"]
+
+[resource]
+script = ExtResource("1_yiw2y")
+id = "swing_speed_2"
+display_name = "Swing Technique"
+description = "Reduce swing cooldown by -7%"
+stat_name = "pickaxe_speed"
+max_level = 4
+currency_costs = Dictionary[String, int]({
+"copper": 18,
+"gold": 6
+})
+value_per_level = 0.07
+required_upgrades = Array[ExtResource("1_yiw2y")]([ExtResource("2_p7kgf"), ExtResource("3_i4qfp")])

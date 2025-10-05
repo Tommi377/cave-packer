@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=4 format=3 uid="uid://b43kw0m7p8cax"]
+
+[ext_resource type="Script" uid="uid://drha3k6bahpqf" path="res://content/upgrades/upgrade_resource.gd" id="1_hrijd"]
+[ext_resource type="Resource" uid="uid://581nob78uxkc" path="res://content/upgrades/resources/inventory_size_5.tres" id="2_g6dcs"]
+[ext_resource type="Resource" uid="uid://clcs8pfcaorfu" path="res://content/upgrades/resources/ore_freq_2.tres" id="3_uvmuh"]
+
+[resource]
+script = ExtResource("1_hrijd")
+id = "inventory_size_6"
+display_name = "The Most Biggest-est Backpack"
+description = "Make your inventory bigger"
+stat_name = "grid_size"
+max_level = 1
+currency_costs = Dictionary[String, int]({
+"diamond": 100
+})
+value_per_level = 1.0
+required_upgrades = Array[ExtResource("1_hrijd")]([ExtResource("2_g6dcs"), ExtResource("3_uvmuh")])
