@@ -1,14 +1,10 @@
-[gd_scene load_steps=10 format=3 uid="uid://c3vvjn5sdswc7"]
+[gd_scene load_steps=8 format=3 uid="uid://c3vvjn5sdswc7"]
 
 [ext_resource type="Script" uid="uid://brlnj23cak2oo" path="res://content/levels/mine_level.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://c21h7xdvxtl7w" path="res://content/player/player.tscn" id="2_player"]
 [ext_resource type="TileSet" uid="uid://t0dbegvgf6qh" path="res://test_stuff/tileset_test.tres" id="2_tk80j"]
 [ext_resource type="Script" uid="uid://cvcqkqqvotbgb" path="res://content/world/mine_tilemap.gd" id="3_tilemap"]
 [ext_resource type="PackedScene" uid="uid://cr3qxj5wg2oj6" path="res://content/inventory/inventory_ui.tscn" id="4_inventory"]
-[ext_resource type="PackedScene" uid="uid://c7t48pbemsa0u" path="res://content/upgrades/skill_tree_ui.tscn" id="5_upgrades"]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_3rynn"]
-size = Vector2(48, 48)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_exit"]
 size = Vector2(32, 32)
@@ -42,33 +38,6 @@ jump_velocity = -270.0
 pickaxe_range = 16.0
 
 [node name="Camera2D" type="Camera2D" parent="Player"]
-
-[node name="SurfaceComputer" type="Node2D" parent="."]
-position = Vector2(397, -25)
-
-[node name="Sprite" type="ColorRect" parent="SurfaceComputer"]
-offset_left = -24.0
-offset_top = -24.0
-offset_right = 24.0
-offset_bottom = 24.0
-color = Color(0.3, 0.5, 0.7, 1)
-metadata/_edit_use_anchors_ = true
-
-[node name="Label" type="Label" parent="SurfaceComputer"]
-offset_left = -40.0
-offset_top = -50.0
-offset_right = 40.0
-offset_bottom = -30.0
-text = "COMPUTER"
-horizontal_alignment = 1
-metadata/_edit_use_anchors_ = true
-
-[node name="Area2D" type="Area2D" parent="SurfaceComputer"]
-collision_layer = 0
-collision_mask = 2
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="SurfaceComputer/Area2D"]
-shape = SubResource("RectangleShape2D_3rynn")
 
 [node name="DepositBox" type="Node2D" parent="."]
 position = Vector2(280, -16)
@@ -131,5 +100,3 @@ offset_top = 100.0
 offset_right = 220.0
 offset_bottom = 123.0
 text = "Goal: $500"
-
-[node name="UpgradeUI" parent="UILayer" instance=ExtResource("5_upgrades")]

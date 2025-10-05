@@ -7,13 +7,9 @@ extends Node2D
 @onready var deadline_bar: ProgressBar = $UILayer/DeadlineBar
 @onready var deadline_label: Label = $UILayer/DeadlineLabel
 @onready var earnings_label: Label = $UILayer/EarningsLabel
-@onready var goal_label: Label = $UILayer/GoalLabel
 @onready var deposit_box_area: Area2D = $DepositBox/Area2D
-@onready var computer_area: Area2D = $SurfaceComputer/Area2D
-@onready var upgrade_ui: SkillTreeUI = $UILayer/UpgradeUI
 
 var player_near_deposit: bool = false
-var player_near_computer: bool = false
 
 func _ready() -> void:
 	setup_camera()
@@ -33,36 +29,24 @@ func _ready() -> void:
 		deposit_box_area.body_entered.connect(_on_deposit_area_entered)
 		deposit_box_area.body_exited.connect(_on_deposit_area_exited)
 	
-	# Connect computer
-	if computer_area:
-		computer_area.body_entered.connect(_on_computer_area_entered)
-		computer_area.body_exited.connect(_on_computer_area_exited)
-	
 	# Connect to GameManager updates
 	if GameManager:
 		GameManager.deadline_changed.connect(_on_deadline_changed)
 		GameManager.money_deposited.connect(_on_money_deposited)
-		GameManager.day_started.connect(_on_day_started)
-		GameManager.day_ended.connect(_on_day_ended)
+		GameManager.run_started.connect(_on_run_started)
+		GameManager.run_ended.connect(_on_run_ended)
 		_update_deadline_display(GameManager.current_time, GameManager.max_time)
 		_update_earnings_display()
 	
-	# Hide upgrade UI initially
-	if upgrade_ui:
-		upgrade_ui.visible = false
-		upgrade_ui.purchase_requested.connect(_on_purchase_requested)
-	
-	# Start the day
-	if GameManager and not GameManager.current_day_active:
-		GameManager.start_day()
+	# Start the run
+	if GameManager and not GameManager.run_active:
+		GameManager.start_run()
 
 func _input(event: InputEvent) -> void:
 	# Inventory UI now handles toggle internally
 	if event.is_action_pressed("interact"):
 		if player_near_deposit:
 			_deposit_inventory()
-		elif player_near_computer:
-			_toggle_upgrade_ui()
 
 func setup_camera() -> void:
 	if player and camera:
@@ -79,6 +63,13 @@ func _on_inventory_mode_changed(is_active: bool) -> void:
 	# Update player's inventory mode state
 	if player:
 		player.inventory_mode_active = is_active
+	
+	# Pause/resume timer during inventory mode
+	if GameManager:
+		if is_active:
+			GameManager.pause_timer()
+		else:
+			GameManager.resume_timer()
 
 func _on_block_broken(tile_pos: Vector2i, ore_type: String) -> void:
 	print("Block broken at ", tile_pos, " - Ore type: ", ore_type)
@@ -91,17 +82,6 @@ func _on_deposit_area_entered(body: Node2D):
 func _on_deposit_area_exited(body: Node2D):
 	if body is Player:
 		player_near_deposit = false
-
-func _on_computer_area_entered(body: Node2D):
-	if body is Player:
-		player_near_computer = true
-		print("Press E to access upgrades")
-
-func _on_computer_area_exited(body: Node2D):
-	if body is Player:
-		player_near_computer = false
-		if upgrade_ui:
-			upgrade_ui.visible = false
 
 func _deposit_inventory():
 	if not inventory_ui:
@@ -123,9 +103,8 @@ func _deposit_inventory():
 	print("Deposited inventory worth ", inventory_value, " credits")
 
 func _toggle_upgrade_ui():
-	upgrade_ui.refresh_tree()
-	if upgrade_ui:
-		upgrade_ui.visible = not upgrade_ui.visible
+	# No longer needed - removed upgrade UI from mine level
+	pass
 
 func _on_deadline_changed(current: float, max_value: float):
 	_update_deadline_display(current, max_value)
@@ -133,16 +112,14 @@ func _on_deadline_changed(current: float, max_value: float):
 func _on_money_deposited(_amount: int):
 	_update_earnings_display()
 
-func _on_day_started():
+func _on_run_started():
 	_update_deadline_display(GameManager.current_time, GameManager.max_time)
 	_update_earnings_display()
 
-func _on_day_ended(goal_met: bool):
-	if goal_met:
-		print("Day completed successfully!")
-	else:
-		print("Day failed - goal not reached")
-	# Could show end-of-day screen here
+func _on_run_ended():
+	print("Run completed!")
+	# Return to surface automatically
+	get_tree().change_scene_to_file("res://content/surface/surface_base.tscn")
 
 func _update_deadline_display(current: float, max_value: float):
 	if deadline_bar:
@@ -167,14 +144,8 @@ func _update_deadline_display(current: float, max_value: float):
 func _update_earnings_display():
 	if GameManager:
 		if earnings_label:
-			earnings_label.text = "Earnings: $%d" % GameManager.current_day_earnings
-		if goal_label:
-			goal_label.text = "Goal: $%d" % GameManager.money_goal
+			earnings_label.text = "Money: $%d" % GameManager.total_money
 
-func _on_purchase_requested(upgrade_id: String):
-	if UpgradeManager:
-		if UpgradeManager.purchase_upgrade(upgrade_id):
-			print("Purchased upgrade: ", upgrade_id)
-			upgrade_ui.refresh_tree()
-		else:
-			print("Cannot purchase upgrade: ", upgrade_id)
+func _on_purchase_requested(_upgrade_id: String):
+	# No longer needed - upgrade UI is on surface
+	pass

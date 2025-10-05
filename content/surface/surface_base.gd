@@ -1,6 +1,6 @@
 extends Node2D
 
-## Surface base scene controller
+## Surface base scene controller - incremental game loop
 
 @onready var upgrade_ui: SkillTreeUI = $UILayer/SkillTreeUI
 @onready var currency_label: Label = $UILayer/CurrencyLabel
@@ -8,21 +8,28 @@ extends Node2D
 
 func _ready():
 	start_run_button.pressed.connect(_on_start_run_pressed)
+	start_run_button.text = "Start Next Run"
 	
 	upgrade_ui.purchase_requested.connect(_on_purchase_requested)
+	
+	# Listen for run ended to refresh UI and show skill tree
+	if GameManager:
+		GameManager.run_ended.connect(_on_run_ended)
+	
+	# Update currency display
 	_update_currency_display()
 	
-	# Listen for day ended to refresh UI
-	if GameManager:
-		GameManager.day_ended.connect(_on_day_ended)
-	
-	# Give some starting currency for testing (first time only)
-	if GameManager and GameManager.current_day_earnings == 0:
-		GameManager.current_day_earnings = 500
+	# Show skill tree immediately - we only arrive here after a run ends
+	if upgrade_ui:
+		upgrade_ui.visible = true
+		# Defer refresh to ensure all systems are ready
+		call_deferred("_refresh_skill_tree")
 		
 func _on_start_run_pressed():
 	if GameManager:
-		GameManager.start_day()
+		# Change to mine scene - GameManager will start the run there
+		get_tree().change_scene_to_file("res://content/levels/mine_level.tscn")
+		upgrade_ui.visible = false
 	else:
 		push_error("GameManager not found!")
 		
@@ -37,14 +44,16 @@ func _on_purchase_requested(upgrade_id: String):
 			
 func _update_currency_display():
 	if GameManager:
-		currency_label.text = "Credits: %d" % GameManager.current_day_earnings
+		currency_label.text = "Credits: %d" % GameManager.total_money
 
-func _on_day_ended(goal_reached: bool):
-	# Refresh currency display after day
+func _on_run_ended():
+	# Refresh currency display and skill tree after run
 	_update_currency_display()
-	upgrade_ui.refresh_tree()
-	
-	if goal_reached:
-		print("Day successful! Goal reached.")
-	else:
-		print("Day failed! Goal not reached.")
+	if upgrade_ui:
+		upgrade_ui.refresh_tree()
+		upgrade_ui.visible = true
+
+func _refresh_skill_tree():
+	# Deferred function to refresh skill tree after ready
+	if upgrade_ui:
+		upgrade_ui.refresh_tree()

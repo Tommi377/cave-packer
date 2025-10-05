@@ -1,68 +1,64 @@
 extends Node
 
-## GameManager - Handles day-based game loop with deadline timer and money goals
+## GameManager - Handles incremental game loop with short runs and upgrades
 
-signal day_started()
-signal day_ended(goal_reached: bool)
+signal run_started()
+signal run_ended()
 signal deadline_changed(current: float, max_value: float)
 signal money_deposited(amount: int)
-signal goal_reached()
 
-## Day state
-var current_day_active: bool = false
-var current_time: float = 300.0 # 5 minutes per day
-var max_time: float = 300.0
+## Run state
+var run_active: bool = false
+var current_time: float = 30.0 # Base 30 seconds per run
+var max_time: float = 30.0
 var time_running: bool = false
 
 ## Money tracking
-var current_day_earnings: int = 0 # Total money the player has (persistent wallet)
-var money_goal: int = 500 # Goal for the current day
+var total_money: int = 0 # Total money the player has (persistent wallet)
 
 ## Scene references
 const MINE_SCENE = "res://content/levels/mine_level.tscn"
 
 func _ready():
 	time_running = false
+	# Give starting money for first-time players
+	if total_money == 0:
+		total_money = 100
+		print("GameManager: Set starting money to 100")
 
 func _process(delta: float):
-	if time_running and current_day_active:
+	if time_running and run_active:
 		_deplete_time(delta)
 
-## Start a new day in the mine
-func start_day():
-	if current_day_active:
-		push_warning("Day already active!")
+## Start a new run in the mine
+func start_run():
+	if run_active:
+		push_warning("Run already active!")
 		return
 	
-	# Get max time from upgrades if needed
-	max_time = 300.0 # Base 5 minutes
+	# Get max time from upgrades
+	max_time = 30.0 # Base 30 seconds
+	if UpgradeManager:
+		max_time += UpgradeManager.get_stat_value("run_time")
+	
 	current_time = max_time
-	current_day_active = true
+	run_active = true
 	time_running = true
-	# DON'T reset current_day_earnings - it's the player's persistent wallet!
 	
-	print("Day started! Time limit: ", max_time, " seconds")
-	print("Current money: ", current_day_earnings)
-	day_started.emit()
+	print("Run started! Time limit: ", max_time, " seconds")
+	print("Current money: ", total_money)
+	run_started.emit()
 
-## End the current day (called when timer runs out)
-func end_day():
-	if not current_day_active:
+## End the current run (called when timer runs out)
+func end_run():
+	if not run_active:
 		return
 	
-	current_day_active = false
+	run_active = false
 	time_running = false
 	
-	var goal_met = current_day_earnings >= money_goal
-	
-	print("Day ended. Total money: ", current_day_earnings, " / Goal: ", money_goal)
-	
-	if goal_met:
-		print("Goal reached! You can continue.")
-	else:
-		print("Goal not reached. Day failed.")
-	
-	day_ended.emit(goal_met)
+	print("Run ended. Total money: ", total_money)
+	run_ended.emit()
 
 func _deplete_time(delta: float):
 	current_time -= delta
@@ -70,27 +66,27 @@ func _deplete_time(delta: float):
 	
 	if current_time <= 0.0:
 		current_time = 0.0
-		# Time's up - force end day
-		end_day()
+		# Time's up - force end run
+		end_run()
 
 ## Called when player deposits ores at deposit box
 func deposit_ores(value: int):
-	current_day_earnings += value
+	total_money += value
 	money_deposited.emit(value)
 	
-	print("Deposited ", value, " credits. Total earnings: ", current_day_earnings, " / ", money_goal)
-	
-	if current_day_earnings >= money_goal:
-		goal_reached.emit()
+	print("Deposited ", value, " credits. Total money: ", total_money)
+
+## Pause the timer (e.g., during inventory mode)
+func pause_timer():
+	time_running = false
+
+## Resume the timer
+func resume_timer():
+	if run_active:
+		time_running = true
 
 ## Get current time percentage
 func get_time_percentage() -> float:
 	if max_time <= 0:
 		return 0.0
 	return (current_time / max_time) * 100.0
-
-## Get progress toward goal
-func get_goal_percentage() -> float:
-	if money_goal <= 0:
-		return 100.0
-	return (float(current_day_earnings) / float(money_goal)) * 100.0

@@ -25,13 +25,13 @@ func _initialize_upgrades() -> void:
 	_add_upgrade("backpack_3", "Huge Backpack", "Expand inventory up to 10×10", 200,
 		"Backpack", "grid_size", 1.0, Vector2i(0, 2), ["backpack_2"], 3, 150)
 	
-	# Oxygen upgrades (each level adds +30s)
-	_add_upgrade("oxygen_1", "O2 Tank I", "Increase oxygen capacity", 75,
-		"Oxygen", "oxygen_max", 30.0, Vector2i(1, 0), [], 3, 75)
-	_add_upgrade("oxygen_2", "O2 Tank II", "Further increase oxygen", 150,
-		"Oxygen", "oxygen_max", 60.0, Vector2i(1, 1), ["oxygen_1"], 3, 100)
-	_add_upgrade("oxygen_3", "O2 Tank III", "Maximum oxygen boost", 300,
-		"Oxygen", "oxygen_max", 90.0, Vector2i(1, 2), ["oxygen_2"], 3, 150)
+	# Run time upgrades (each level adds +10s to run duration)
+	_add_upgrade("run_time_1", "Extra Time I", "Increase run time by 10s", 50,
+		"Time", "run_time", 10.0, Vector2i(1, 0), [], 1, 50)
+	_add_upgrade("run_time_2", "Extra Time II", "Increase run time by 20s", 100,
+		"Time", "run_time", 10.0, Vector2i(1, 1), ["run_time_1"], 1, 100)
+	_add_upgrade("run_time_3", "Extra Time III", "Increase run time by 30s", 200,
+		"Time", "run_time", 10.0, Vector2i(1, 2), ["run_time_2"], 3, 150)
 	
 	# Pickaxe upgrades
 	_add_upgrade("pickaxe_speed_1", "Fast Swing", "Mine faster", 60,
@@ -93,10 +93,10 @@ func purchase_upgrade(upgrade_id: String) -> bool:
 	
 	# Calculate cost based on level (base_cost + (current_level * cost_step))
 	var upgrade_cost = upgrade.base_cost + (upgrade.current_level * upgrade.cost_step)
-	print("Cost: ", upgrade_cost, " | Available money: ", GameManager.current_day_earnings)
+	print("Cost: ", upgrade_cost, " | Available money: ", GameManager.total_money)
 	
 	# Check if can afford
-	if GameManager.current_day_earnings < upgrade_cost:
+	if GameManager.total_money < upgrade_cost:
 		print("ERROR: Not enough money")
 		return false
 	
@@ -109,7 +109,7 @@ func purchase_upgrade(upgrade_id: String) -> bool:
 	print("All checks passed - purchasing!")
 	
 	# Purchase
-	GameManager.current_day_earnings -= upgrade_cost
+	GameManager.total_money -= upgrade_cost
 	upgrade.current_level += 1
 	upgrade_levels[upgrade_id] = upgrade.current_level
 	
@@ -161,9 +161,9 @@ func get_upgrade_cost(upgrade_id: String) -> int:
 func get_backpack_size() -> int:
 	return 5 + int(get_stat_value("grid_size"))
 
-## Get current oxygen capacity
-func get_oxygen_capacity() -> float:
-	return 120.0 + get_stat_value("oxygen_max") # Base 120 seconds
+## Get current run time capacity
+func get_run_time() -> float:
+	return 30.0 + get_stat_value("run_time") # Base 30 seconds
 
 ## Get pickaxe speed multiplier
 func get_pickaxe_speed_multiplier() -> float:

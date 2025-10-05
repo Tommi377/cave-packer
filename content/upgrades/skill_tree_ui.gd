@@ -37,7 +37,7 @@ func _process(_delta):
 			last_can_purchase = can_buy
 			if GameManager:
 				var cost = UpgradeManager.get_upgrade_cost(selected_upgrade_id)
-				print("Purchase state changed - Money: ", GameManager.current_day_earnings, " Cost: ", cost, " Can buy: ", can_buy)
+				print("Purchase state changed - Money: ", GameManager.total_money, " Cost: ", cost, " Can buy: ", can_buy)
 	
 func initialize():
 	if UpgradeManager:
@@ -116,8 +116,8 @@ func can_purchase(upgrade_id: String) -> bool:
 			
 	# Check currency using the cost function
 	var cost = UpgradeManager.get_upgrade_cost(upgrade_id)
-	if GameManager.current_day_earnings < cost:
-		print("can_purchase: Not enough money. Have: ", GameManager.current_day_earnings, " Need: ", cost)
+	if GameManager.total_money < cost:
+		print("can_purchase: Not enough money. Have: ", GameManager.total_money, " Need: ", cost)
 		return false
 		
 	return true
@@ -191,7 +191,7 @@ func _show_upgrade_info(upgrade_id: String):
 		purchase_button.text = "Maxed"
 	elif cost > 0:
 		if GameManager:
-			upgrade_cost_label.text = "Cost: %d (You have: %d)" % [cost, GameManager.current_day_earnings]
+			upgrade_cost_label.text = "Cost: %d (You have: %d)" % [cost, GameManager.total_money]
 		else:
 			upgrade_cost_label.text = "Cost: %d" % cost
 		purchase_button.text = "Purchase"
